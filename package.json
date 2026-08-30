@@ -1,0 +1,41 @@
+{
+  "name": "mail-service",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "email:dev": "email dev --dir emails",
+    "generate-key": "tsx scripts/generate-key.ts",
+    "verify-domain": "tsx scripts/verify-domain.ts",
+    "check-domain": "tsx scripts/check-domain.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.699.0",
+    "@aws-sdk/client-sns": "^3.699.0",
+    "@react-email/components": "^0.0.31",
+    "@upstash/ratelimit": "^2.0.5",
+    "@upstash/redis": "^1.34.3",
+    "next": "^15.1.0",
+    "nodemailer": "^9.0.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-email": "^3.0.4",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/nodemailer": "^8.0.1",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "packageManager": "pnpm@12.1.0"
+}
