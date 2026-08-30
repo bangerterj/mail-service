@@ -1,6 +1,9 @@
 import * as React from "react";
 import { z } from "zod";
 import { ActivityDigestEmail, activityDigestText } from "./activity-digest";
+import { GroupInviteEmail, groupInviteText } from "./group-invite";
+import { HouseholdInviteEmail, householdInviteText } from "./household-invite";
+import { MagicSignInEmail, magicSignInText } from "./magic-sign-in";
 import { MentionEmail, mentionText } from "./mention";
 import { PasswordResetEmail, passwordResetText } from "./password-reset";
 import { VerifyEmail, verifyEmailText } from "./verify-email";
@@ -77,6 +80,48 @@ export const templates = {
     subject: (d) => `${d.actorName} mentioned you in ${d.contextTitle}`,
     component: (props) => React.createElement(MentionEmail, props),
     text: mentionText,
+  }),
+  "magic-sign-in": define({
+    category: "transactional",
+    schema: z.object({
+      signInUrl: z.string().url(),
+      name: z.string().max(100).optional(),
+      expiresIn: z.string().max(50).optional(),
+    }),
+    subject: (_d, appName) => `Sign in to ${appName}`,
+    component: (props) => React.createElement(MagicSignInEmail, props),
+    text: magicSignInText,
+  }),
+  "household-invite": define({
+    // Notification: someone else's action caused it, so it carries an opt-out.
+    // Invite spam with no way to stop it is a fast route to complaints.
+    category: "notification",
+    schema: z.object({
+      inviterName: z.string().min(1).max(100),
+      householdName: z.string().min(1).max(100),
+      acceptUrl: z.string().url(),
+      // The consent panel. Required — a household invite that does not say what
+      // it grants is the failure this template exists to prevent.
+      shares: z.array(z.string().min(1).max(120)).min(1).max(20),
+      recipientName: z.string().max(100).optional(),
+      expiresIn: z.string().max(50).optional(),
+    }),
+    subject: (d) => `${d.inviterName} invited you to join ${d.householdName}`,
+    component: (props) => React.createElement(HouseholdInviteEmail, props),
+    text: householdInviteText,
+  }),
+  "group-invite": define({
+    category: "notification",
+    schema: z.object({
+      inviterName: z.string().min(1).max(100),
+      groupName: z.string().min(1).max(100),
+      acceptUrl: z.string().url(),
+      recipientName: z.string().max(100).optional(),
+      expiresIn: z.string().max(50).optional(),
+    }),
+    subject: (d) => `${d.inviterName} invited you to ${d.groupName}`,
+    component: (props) => React.createElement(GroupInviteEmail, props),
+    text: groupInviteText,
   }),
   "activity-digest": define({
     category: "notification",

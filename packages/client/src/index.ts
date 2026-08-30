@@ -18,6 +18,23 @@ export interface TemplateData {
     items: Array<{ title: string; detail?: string; url?: string }>;
     actionUrl?: string;
   };
+  "magic-sign-in": { signInUrl: string; name?: string; expiresIn?: string };
+  "household-invite": {
+    inviterName: string;
+    householdName: string;
+    acceptUrl: string;
+    /** The consent panel: what accepting would start sharing. Required. */
+    shares: string[];
+    recipientName?: string;
+    expiresIn?: string;
+  };
+  "group-invite": {
+    inviterName: string;
+    groupName: string;
+    acceptUrl: string;
+    recipientName?: string;
+    expiresIn?: string;
+  };
 }
 
 export type TemplateName = keyof TemplateData;
@@ -27,7 +44,11 @@ export type TemplateName = keyof TemplateData;
  * practically need an opt-out, so `unsubscribeUrl` is required for them at the
  * type level — the server also enforces it with a 400.
  */
-export type NotificationTemplate = "mention" | "activity-digest";
+export type NotificationTemplate =
+  | "mention"
+  | "activity-digest"
+  | "household-invite"
+  | "group-invite";
 export type TransactionalTemplate = Exclude<TemplateName, NotificationTemplate>;
 
 export type SendRequest<T extends TemplateName> = {

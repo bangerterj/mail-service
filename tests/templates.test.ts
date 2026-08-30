@@ -4,7 +4,7 @@ import { templateNames, templates } from "@/emails";
 import { renderTemplate } from "@/lib/render";
 
 describe("template registry", () => {
-  it("exposes the five planned templates", () => {
+  it("exposes every registered template", () => {
     expect(new Set(templateNames)).toEqual(
       new Set([
         "welcome",
@@ -12,8 +12,33 @@ describe("template registry", () => {
         "verify-email",
         "mention",
         "activity-digest",
+        "magic-sign-in",
+        "household-invite",
+        "group-invite",
       ]),
     );
+  });
+
+  it("categorizes sign-in as transactional and invites as notifications", () => {
+    expect(templates["magic-sign-in"].category).toBe("transactional");
+    expect(templates["household-invite"].category).toBe("notification");
+    expect(templates["group-invite"].category).toBe("notification");
+  });
+
+  it("requires the household invite consent panel to be non-empty", () => {
+    const base = {
+      inviterName: "Jeff",
+      householdName: "The Bangerters",
+      acceptUrl: "https://a.test/i/1",
+    };
+    expect(templates["household-invite"].schema.safeParse(base).success).toBe(false);
+    expect(
+      templates["household-invite"].schema.safeParse({ ...base, shares: [] }).success,
+    ).toBe(false);
+    expect(
+      templates["household-invite"].schema.safeParse({ ...base, shares: ["Pantry"] })
+        .success,
+    ).toBe(true);
   });
 
   it("categorizes auth mail transactional and activity mail notification", () => {
@@ -95,6 +120,57 @@ describe("renderTemplate", () => {
     );
     expect(out.html.toLowerCase()).not.toContain("unsubscribe");
     expect(out.text.toLowerCase()).not.toContain("unsubscribe");
+  });
+
+  it("renders the household consent panel into both parts", async () => {
+    const out = await renderTemplate(
+      "household-invite",
+      {
+        inviterName: "Jeff",
+        householdName: "The Bangerters",
+        acceptUrl: "https://a.test/i/1",
+        shares: ["Pantry inventory", "Shopping cart", "Every shopping list"],
+      },
+      "Family Pantree",
+      "https://a.test/opt-out",
+    );
+    expect(out.subject).toBe("Jeff invited you to join The Bangerters");
+    for (const part of [out.html, out.text]) {
+      expect(part).toContain("Pantry inventory");
+      expect(part).toContain("Shopping cart");
+      expect(part).toContain("Every shopping list");
+      expect(part).toContain("https://a.test/opt-out");
+    }
+  });
+
+  it("group invite states recipe-only scope and never implies household sharing", async () => {
+    const out = await renderTemplate(
+      "group-invite",
+      {
+        inviterName: "Jeff",
+        groupName: "Sunday Dinner Crew",
+        acceptUrl: "https://a.test/g/1",
+      },
+      "Family Pantree",
+      "https://a.test/opt-out",
+    );
+    expect(out.subject).toBe("Jeff invited you to Sunday Dinner Crew");
+    // Must say recipes only, and must NOT claim to share pantry/cart/lists.
+    expect(out.text.toLowerCase()).toContain("recipes only");
+    expect(out.text).toMatch(/does not share your pantry/i);
+    expect(out.html).toMatch(/recipes/i);
+  });
+
+  it("magic sign-in carries no unsubscribe and warns about forwarding", async () => {
+    const out = await renderTemplate(
+      "magic-sign-in",
+      { signInUrl: "https://a.test/auth?t=1", expiresIn: "in 15 minutes" },
+      "Family Pantree",
+    );
+    expect(out.subject).toBe("Sign in to Family Pantree");
+    expect(out.text).toContain("https://a.test/auth?t=1");
+    expect(out.text.toLowerCase()).toContain("do not forward");
+    expect(out.html.toLowerCase()).not.toContain("unsubscribe");
   });
 
   it("puts the app name in the welcome and verify subjects", async () => {

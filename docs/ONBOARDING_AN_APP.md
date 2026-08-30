@@ -176,8 +176,41 @@ Available templates and their exact `data` shapes:
 | `password-reset` | `{ resetUrl: string; name?: string }` | transactional |
 | `verify-email` | `{ verifyUrl: string; name?: string }` | transactional |
 | `welcome` | `{ name?: string; actionUrl?: string }` | transactional |
+| `magic-sign-in` | `{ signInUrl: string; name?: string; expiresIn?: string }` | transactional — signs the recipient in; distinct from `verify-email`, which only proves address ownership |
 | `mention` | `{ actorName: string; contextTitle: string; excerpt?: string; url: string }` | notification — requires `unsubscribeUrl` |
 | `activity-digest` | `{ period: string; items: Array<{title: string; detail?: string; url?: string}>; actionUrl?: string }` | notification — requires `unsubscribeUrl` |
+| `household-invite` | `{ inviterName: string; householdName: string; acceptUrl: string; shares: string[]; recipientName?: string; expiresIn?: string }` | notification — requires `unsubscribeUrl`. `shares` is the consent panel and is **required** |
+| `group-invite` | `{ inviterName: string; groupName: string; acceptUrl: string; recipientName?: string; expiresIn?: string }` | notification — requires `unsubscribeUrl` |
+
+#### Invites: household and group are deliberately different emails
+
+`household-invite` and `group-invite` are separate templates and must stay that way.
+A household grants pantry, cart, stores, staples and every shopping list; a group grants
+recipe visibility only. Sending the wrong one misrepresents what the recipient is agreeing
+to.
+
+`household-invite` requires a non-empty `shares` array, rendered as a "What you would
+start sharing" panel in both the HTML and plaintext parts. **That panel is the consent
+record** — pass the real list of what accepting grants, not a summary:
+
+```ts
+await mail.send({
+  to: invitee.email,
+  template: "household-invite",
+  data: {
+    inviterName: inviter.displayName,
+    householdName: household.name,
+    acceptUrl: `https://familypantree.com/invite/${token}`,
+    shares: ["Pantry inventory", "Shopping cart", "Saved stores", "Staples list", "Every shopping list"],
+    expiresIn: "in 7 days",
+  },
+  unsubscribeUrl: `https://familypantree.com/invites/opt-out?token=${optOutToken}`,
+});
+```
+
+`group-invite` states in the body that a group shares recipes only and explicitly does not
+share pantry, cart, stores, staples or lists. It takes no `shares` array — the scope is
+fixed and stated in the template, so it cannot drift.
 
 Only the templates listed in this app's config are permitted; anything else returns 403.
 URLs must be absolute and valid, or the send is a 400.
