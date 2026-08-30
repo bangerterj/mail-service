@@ -105,13 +105,13 @@ Generate a key and a ready-to-paste config fragment:
 pnpm generate-key meal-picker mealpicker.com
 ```
 
-> **On Windows PowerShell**, pnpm 12 swallows script output — the command appears to do
-> nothing and exits 0 (even bare `pnpm run` prints no script list). It works in Git Bash.
-> From PowerShell, use npm or call the script directly:
->
-> ```
-> npm run generate-key --silent -- meal-picker mealpicker.com
-> ```
+Run it **from the repo root** — from anywhere else npm/pnpm cannot find `package.json`,
+and with `--silent` that failure is invisible.
+
+> **Use pnpm 10.x, not 12.** pnpm 12 swallows all script output on Windows PowerShell
+> (commands appear to do nothing and exit 0), and Vercel's pnpm 12 bootstrap is broken,
+> so `packageManager: "pnpm@12"` fails the deploy. This repo pins nothing; `npm i -g pnpm@10`
+> is the supported setup.
 
 ---
 
