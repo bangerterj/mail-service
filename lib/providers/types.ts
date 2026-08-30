@@ -11,6 +11,8 @@ export interface SendParams {
    * List-Unsubscribe-Post here; transactional sends carry neither.
    */
   headers?: Record<string, string>;
+  /** SES configuration set. Omitted entirely when the app config has none. */
+  configurationSet?: string;
 }
 
 export interface EmailProvider {

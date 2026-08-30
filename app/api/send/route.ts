@@ -142,6 +142,7 @@ export async function POST(req: NextRequest) {
       html: rendered.html,
       text: rendered.text,
       ...(headers ? { headers } : {}),
+      ...(app.configurationSet ? { configurationSet: app.configurationSet } : {}),
     });
 
     logger.info("send ok", {

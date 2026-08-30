@@ -11,6 +11,7 @@ process.env.APPS = JSON.stringify({
     from: "noreply@beta.test",
     fromName: "Beta App",
     templates: ["verify-email"],
+    configurationSet: "beta",
   },
 });
 process.env.EMAIL_PROVIDER = "console";

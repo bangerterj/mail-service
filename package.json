@@ -13,7 +13,8 @@
     "email:dev": "email dev --dir emails",
     "generate-key": "tsx scripts/generate-key.ts",
     "verify-domain": "tsx scripts/verify-domain.ts",
-    "check-domain": "tsx scripts/check-domain.ts"
+    "check-domain": "tsx scripts/check-domain.ts",
+    "smoke:ses": "tsx scripts/ses-smoke.ts"
   },
   "dependencies": {
     "@aws-sdk/client-sesv2": "^3.699.0",

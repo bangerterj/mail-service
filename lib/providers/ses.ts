@@ -65,6 +65,11 @@ export const sesProvider: EmailProvider = {
       FromEmailAddress: formatSender(params.fromName, params.from),
       Destination: { ToAddresses: params.to },
       ...(params.replyTo ? { ReplyToAddresses: [params.replyTo] } : {}),
+      // Omitted entirely when absent — naming a config set that does not exist
+      // in AWS fails the send.
+      ...(params.configurationSet
+        ? { ConfigurationSetName: params.configurationSet }
+        : {}),
       Content: content,
     };
 

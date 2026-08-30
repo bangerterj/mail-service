@@ -52,7 +52,7 @@ pnpm email:dev
 | Var | Required | Purpose |
 |---|---|---|
 | `APPS` | yes | JSON map of API key → app config (below) |
-| `AWS_REGION` | yes | e.g. `us-east-1` |
+| `AWS_REGION` | yes | `us-east-1` — **fixed**, see `AWS_HANDOFF.md` |
 | `MAIL_AWS_ACCESS_KEY_ID` | yes | IAM user scoped to SES send only |
 | `MAIL_AWS_SECRET_ACCESS_KEY` | yes | — |
 | `EMAIL_PROVIDER` | no | `ses` (default) or `console` for local dev |
@@ -62,6 +62,11 @@ pnpm email:dev
 
 Do not prefix these with `NEXT_PUBLIC_`. The credentials carry a `MAIL_` prefix because
 Vercel reserves the bare `AWS_*` names in some integration contexts.
+
+**The region is fixed at `us-east-1`.** SES identities, production access, and
+configuration sets are all per-region, and the verified domains live there. Keep Vercel
+functions in the default `iad1` region, which is co-located with it. `verify-domain`
+refuses to run against any other region.
 
 ### `APPS` shape
 
@@ -73,10 +78,22 @@ Vercel reserves the bare `AWS_*` names in some integration contexts.
     "fromName": "Meal Picker",
     "replyTo": "support@mealpicker.com",              // optional
     "templates": ["welcome", "password-reset", "verify-email", "mention"],
+    "configurationSet": "meal-picker",                // optional; see below
     "rateLimit": { "requests": 100, "window": "1h" }  // optional; defaults to this
   }
 }
 ```
+
+**`configurationSet`** names an SES configuration set — one per app, named after the
+`appId`. It gives per-app delivery/bounce/complaint metrics and per-app CloudWatch alarms
+for free, and is the low-cost substitute for SES Tenants. It is passed through as
+`ConfigurationSetName` when present and **omitted entirely when absent**, so the service
+works fine before the sets exist.
+
+Only add the field once the set actually exists in AWS — naming a set that does not exist
+fails every send. Leave engagement/open/click tracking **off** on these sets: it rewrites
+every link through an AWS redirect domain, which is unacceptable on password-reset and
+verification email.
 
 Parsed and validated with zod at module load. Invalid JSON, an unknown template name, a
 non-email `from`, or a duplicate `appId` crashes at boot — misconfiguration fails loud.
@@ -229,13 +246,26 @@ Raw-MIME sending uses the same `ses:SendEmail` permission — nothing extra is n
 
 3. **Verify each domain:**
 
+   The MAIL FROM subdomain is always `mail.<domain>`, and "Behavior on MX failure" stays
+   at **Use default MAIL FROM domain** so a DNS problem degrades alignment rather than
+   dropping auth email.
+
 ```bash
 pnpm verify-domain mealpicker.com
 ```
 
 This creates the SES identity, configures a custom MAIL FROM subdomain, and prints the
-exact DNS records to add: 3 DKIM CNAMEs, the MAIL FROM MX and SPF TXT, and a starter
-DMARC record. Add them at your DNS provider, then poll until verified:
+exact DNS records to add: 3 DKIM CNAMEs (Easy DKIM, RSA-2048), the MAIL FROM MX and SPF
+TXT, and a starter DMARC record.
+
+**The script only prints records — it never writes DNS.** These domains carry live traffic
+and live email from other providers, so add the records by hand, alongside what is already
+there. On `tript.io` specifically, the `send` MX/TXT and `resend._domainkey` (Resend) and
+`smtp._domainkey` plus the apex MX/SPF (Mailgun via Squarespace) are load-bearing and must
+not be touched; ours live under `mail.` and coexist deliberately. If a `_dmarc` record
+already exists, leave it alone — a second one breaks DMARC.
+
+Then poll until verified:
 
 ```bash
 pnpm check-domain mealpicker.com --watch
@@ -257,7 +287,27 @@ pnpm check-domain mealpicker.com --watch
    Adjust the volume figure to your real estimate — understating it is not useful, since
    the quota rises automatically with clean sending history. Typically approved within a day.
 
-5. **Create the SNS topic and subscribe the webhook** (previous section).
+5. **Create the SNS topic and subscribe the webhook** (previous section). This has to
+   happen after the first deploy, since the subscription needs a reachable HTTPS URL.
+
+### Sandbox limits
+
+Until production access is granted the account is in the SES sandbox: **200 messages per
+24h, 1 per second**, and recipients must be verified identities. A verified *domain*
+covers every address at it, so any `@tript.io` address already works as a recipient — as
+do the mailbox simulator addresses, which need no verification at all.
+
+### Account settings that are deliberately off
+
+Do not turn these on without a reason:
+
+- **Engagement tracking** — rewrites every link through an AWS redirect domain. If
+  per-message tracking is ever needed for non-auth mail, scope it to a configuration set
+  for those templates only.
+- **Auto Validation** — can silently suppress sends on a validity heuristic; a false
+  positive means a user never gets a password reset and no error surfaces. Our
+  bounce-driven suppression list replaces it.
+- **Dedicated IPs** — ~$25/mo each and actively harmful at low volume. Shared pool only.
 
 ---
 
@@ -315,7 +365,7 @@ Template names and their `data` shapes are typed, so a wrong field fails at comp
 ## Testing
 
 ```bash
-pnpm test        # 81 tests
+pnpm test        # 89 tests
 pnpm typecheck
 pnpm build
 ```
@@ -325,6 +375,18 @@ appId), auth (unknown/missing/prefix keys), template data validation, category-a
 suppression, MIME construction, the SNS webhook (subscription confirmation, hard vs. soft
 bounce, complaint scope, secret, cert-URL rejection), and the client.
 
+Against real SES, a sandbox-safe smoke test using the mailbox simulator (these addresses
+need no verification and do not affect reputation):
+
+```bash
+pnpm smoke:ses --all
+```
+
+It sends `success@`, `bounce@` and `complaint@simulator.amazonses.com` through the SES
+provider directly. The bounce and complaint come back asynchronously via SNS — once the
+topic is subscribed, confirm `bounce@` lands in `mail:suppressed:all` and `complaint@` in
+`mail:suppressed:notification`.
+
 The load-bearing route assertions:
 
 - the from-address comes from config and **cannot** be overridden by the request body
@@ -332,6 +394,8 @@ The load-bearing route assertions:
 - a notification template with no `unsubscribeUrl` is a `400`
 - notification sends carry both `List-Unsubscribe` headers; transactional sends carry neither
 - a complaint blocks a `mention` to that address but the `password-reset` still goes out
+- `ConfigurationSetName` is set only when the app config supplies one, and can never be
+  set from the request body
 
 ---
 

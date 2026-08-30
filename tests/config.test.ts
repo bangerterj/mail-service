@@ -36,6 +36,27 @@ describe("parseApps", () => {
     });
   });
 
+  it("parses an optional configurationSet", () => {
+    const apps = parseApps(
+      JSON.stringify({
+        key_live_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: {
+          ...valid.key_live_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+          configurationSet: "alpha",
+        },
+      }),
+    );
+    expect(
+      apps.get("key_live_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")?.configurationSet,
+    ).toBe("alpha");
+  });
+
+  it("leaves configurationSet undefined when absent", () => {
+    const apps = parseApps(JSON.stringify(valid));
+    expect(
+      apps.get("key_live_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")?.configurationSet,
+    ).toBeUndefined();
+  });
+
   it("throws when APPS is missing or empty", () => {
     expect(() => parseApps(undefined)).toThrow(/APPS is required/);
     expect(() => parseApps("   ")).toThrow(/APPS is required/);

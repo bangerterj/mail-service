@@ -334,3 +334,32 @@ describe("POST /api/send - suppression is category-aware", () => {
     expect(sent).toHaveLength(0);
   });
 });
+
+describe("POST /api/send - SES configuration set", () => {
+  it("passes the app's configurationSet through to the provider", async () => {
+    const res = await POST(
+      request(
+        {
+          to: "user@example.com",
+          template: "verify-email",
+          data: { verifyUrl: "https://beta.test/v" },
+        },
+        BETA_KEY,
+      ),
+    );
+    expect(res.status).toBe(202);
+    expect(sent[0].configurationSet).toBe("beta");
+  });
+
+  it("omits configurationSet entirely for an app that has none", async () => {
+    const res = await POST(request(validBody));
+    expect(res.status).toBe(202);
+    expect(sent[0].configurationSet).toBeUndefined();
+    expect("configurationSet" in sent[0]).toBe(false);
+  });
+
+  it("cannot be set from the request body", async () => {
+    await POST(request({ ...validBody, configurationSet: "attacker-set" }));
+    expect(sent[0].configurationSet).toBeUndefined();
+  });
+});

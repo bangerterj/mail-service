@@ -12,7 +12,16 @@ if (!domain) {
   process.exit(1);
 }
 
+// Fixed per AWS_HANDOFF.md: identities and production access are per-region.
 const region = process.env.AWS_REGION ?? "us-east-1";
+if (region !== "us-east-1") {
+  console.error(
+    `Refusing to run against region "${region}". The SES identities and production
+` +
+      "access live in us-east-1 (see AWS_HANDOFF.md). Unset AWS_REGION or set it to us-east-1.",
+  );
+  process.exit(1);
+}
 const client = new SESv2Client({
   region,
   ...(process.env.MAIL_AWS_ACCESS_KEY_ID && process.env.MAIL_AWS_SECRET_ACCESS_KEY

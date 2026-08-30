@@ -14,6 +14,7 @@ export const consoleProvider: EmailProvider = {
       replyTo: params.replyTo,
       subject: params.subject,
       headers: params.headers,
+      configurationSet: params.configurationSet,
     });
     console.log(`\n--- text/plain ---\n${params.text}\n--- text/html ---\n${params.html}\n`);
     return { id };

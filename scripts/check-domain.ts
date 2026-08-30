@@ -9,6 +9,7 @@ if (!domain) {
 const watch = process.argv.includes("--watch");
 
 const client = new SESv2Client({
+  // Fixed per AWS_HANDOFF.md.
   region: process.env.AWS_REGION ?? "us-east-1",
   ...(process.env.MAIL_AWS_ACCESS_KEY_ID && process.env.MAIL_AWS_SECRET_ACCESS_KEY
     ? {

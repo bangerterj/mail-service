@@ -14,6 +14,12 @@ const appConfigSchema = z.object({
   fromName: z.string().min(1),
   replyTo: z.string().email().optional(),
   templates: z.array(z.enum(templateNames)).min(1),
+  /**
+   * SES configuration set name, one per app (convention: the appId). Gives
+   * per-app delivery/bounce metrics and CloudWatch alarms without SES Tenants.
+   * Optional: the sets may not exist in AWS yet, and sending must work without.
+   */
+  configurationSet: z.string().min(1).max(64).optional(),
   rateLimit: rateLimitSchema.optional(),
 });
 
@@ -61,8 +67,14 @@ export const apps: Map<string, AppConfig> = parseApps(process.env.APPS);
 
 export const providerName = (process.env.EMAIL_PROVIDER ?? "ses") as "ses" | "console";
 
+/**
+ * us-east-1 is fixed: SES identities, production access, and configuration sets
+ * are all per-region, and the verified domains live there. See AWS_HANDOFF.md.
+ */
+export const DEFAULT_REGION = "us-east-1";
+
 export const config = {
-  region: process.env.AWS_REGION ?? "us-east-1",
+  region: process.env.AWS_REGION ?? DEFAULT_REGION,
   accessKeyId: process.env.MAIL_AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.MAIL_AWS_SECRET_ACCESS_KEY,
   webhookSecret: process.env.SES_WEBHOOK_SECRET,

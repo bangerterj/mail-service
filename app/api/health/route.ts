@@ -14,6 +14,9 @@ export async function GET() {
     region: config.region,
     apps: apps.size,
     appIds: Array.from(apps.values()).map((a) => a.appId),
+    configurationSets: Object.fromEntries(
+      Array.from(apps.values()).map((a) => [a.appId, a.configurationSet ?? null]),
+    ),
     templates: templateNames,
     redis: getRedis() ? "configured" : "disabled",
     webhookSecret: config.webhookSecret ? "configured" : "unset",
