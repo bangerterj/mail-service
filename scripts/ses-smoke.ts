@@ -14,21 +14,14 @@
  * Requires real credentials in .env. It sends through the SES provider directly,
  * bypassing the HTTP route, so no server needs to be running.
  */
-import { readFileSync } from "node:fs";
+import { loadEnv, requireAwsCredentials } from "./load-env";
 import { renderTemplate } from "../lib/render";
 
-// Minimal .env loader — avoids a dependency and never prints values.
-try {
-  for (const line of readFileSync(".env", "utf8").split("\n")) {
-    const match = /^\s*([A-Z0-9_]+)\s*=\s*(.*)$/.exec(line);
-    if (!match) continue;
-    const value = match[2].trim().replace(/^["']|["']$/g, "");
-    if (!process.env[match[1]]) process.env[match[1]] = value;
-  }
-} catch {
+if (!loadEnv()) {
   console.error("No .env found. Copy .env.example and fill in real credentials.");
   process.exit(1);
 }
+requireAwsCredentials();
 
 process.env.EMAIL_PROVIDER = "ses";
 

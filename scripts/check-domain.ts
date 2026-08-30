@@ -1,5 +1,9 @@
 #!/usr/bin/env tsx
 import { SESv2Client, GetEmailIdentityCommand } from "@aws-sdk/client-sesv2";
+import { loadEnv, requireAwsCredentials } from "./load-env";
+
+loadEnv();
+requireAwsCredentials();
 
 const domain = process.argv[2];
 if (!domain) {

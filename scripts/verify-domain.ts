@@ -5,6 +5,10 @@ import {
   GetEmailIdentityCommand,
   PutEmailIdentityMailFromAttributesCommand,
 } from "@aws-sdk/client-sesv2";
+import { loadEnv, requireAwsCredentials } from "./load-env";
+
+loadEnv();
+requireAwsCredentials();
 
 const domain = process.argv[2];
 if (!domain) {
@@ -95,10 +99,24 @@ async function main() {
     ["TXT", `_dmarc.${domain}`, `"v=DMARC1; p=none; rua=mailto:dmarc@${domain}"`],
   ];
 
-  console.log(`\nAdd these DNS records for ${domain}:\n`);
+  console.log(`\nADD these DNS records for ${domain}:\n`);
   table(rows);
   console.log(
-    `\nDNS propagation usually takes minutes to a few hours.` +
+    "\nThis script only PRINTS records — it never writes DNS. Add them by hand.\n" +
+      "\nBefore you do:\n" +
+      "  * ADD these alongside what is already there. Do not replace the zone.\n" +
+      "    Existing mail records on a live domain are load-bearing — on tript.io that\n" +
+      "    means the `send` MX/TXT and `resend._domainkey` (Resend), plus\n" +
+      "    `smtp._domainkey` and the apex MX/SPF (Mailgun). Ours live under `mail.`\n" +
+      "    and coexist with them deliberately.\n" +
+      "  * On Cloudflare the three DKIM CNAMEs must be DNS only (grey cloud). A\n" +
+      "    proxied CNAME returns Cloudflare's IP instead of the target, so SES never\n" +
+      "    sees the record and verification hangs with no error.\n" +
+      "  * The DMARC row is a SUGGESTION for a domain with no _dmarc record. If one\n" +
+      "    already exists, LEAVE IT ALONE — two _dmarc TXT records break DMARC.\n" +
+      `  * One SPF TXT per name. The SPF above belongs on ${mailFromSubdomain},\n` +
+      "    not on the apex.\n" +
+      `\nDNS propagation usually takes minutes to a few hours.` +
       `\nThen run: pnpm check-domain ${domain}\n`,
   );
   if (tokens.length === 0) {
