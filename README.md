@@ -105,6 +105,14 @@ Generate a key and a ready-to-paste config fragment:
 pnpm generate-key meal-picker mealpicker.com
 ```
 
+> **On Windows PowerShell**, pnpm 12 swallows script output — the command appears to do
+> nothing and exits 0 (even bare `pnpm run` prints no script list). It works in Git Bash.
+> From PowerShell, use npm or call the script directly:
+>
+> ```
+> npm run generate-key --silent -- meal-picker mealpicker.com
+> ```
+
 ---
 
 ## API
