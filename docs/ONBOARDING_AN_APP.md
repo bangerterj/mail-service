@@ -152,7 +152,17 @@ import the mail client into a client component, never call the API from the brow
 leaked key lets anyone send mail as this domain. All calls belong in server actions, route
 handlers, or backend jobs.
 
-### 3. Send mail
+### 3. Need an email that does not exist yet?
+
+The templates below are what exists today. If your app needs a different email —
+its own branding, its own voice, a different structure — that is a template added
+to the `mail-service` repo, not something you can pass in. Apps cannot send HTML.
+
+See `docs/ADDING_A_TEMPLATE.md`. Templates are not required to share a visual
+style: name it after your app (`tript-signin`) and make it look however your app
+should look.
+
+### 4. Send mail
 
 ```ts
 import { createMailClient, MailError } from "@/lib/mail-client";
@@ -215,7 +225,7 @@ fixed and stated in the template, so it cannot drift.
 Only the templates listed in this app's config are permitted; anything else returns 403.
 URLs must be absolute and valid, or the send is a 400.
 
-### 4. Notification email needs an opt-out
+### 5. Notification email needs an opt-out
 
 `mention` and `activity-digest` are notifications — caused by *someone else's* action — so
 they require an `unsubscribeUrl`. Omitting it is a compile error in the client and a 400
@@ -241,7 +251,7 @@ the user's preference *before* calling `send`.
 Transactional mail (password reset, verification) has no unsubscribe, by design — nobody
 should be able to opt out of resetting their own password.
 
-### 5. Handle the outcomes
+### 6. Handle the outcomes
 
 ```ts
 try {
@@ -272,7 +282,7 @@ Two non-obvious behaviors:
 Email sending should not block the user's request path. Prefer a background job or
 fire-and-forget with error logging over making signup wait on an SMTP round trip.
 
-### 6. Test without sending anything
+### 7. Test without sending anything
 
 Point `MAIL_SERVICE_URL` at a local mail-service running with `EMAIL_PROVIDER=console`,
 which logs the rendered email instead of sending. Or, in the app's own tests, inject a
