@@ -8,6 +8,31 @@ import { MentionEmail, mentionText } from "./mention";
 import { PasswordResetEmail, passwordResetText } from "./password-reset";
 import { VerifyEmail, verifyEmailText } from "./verify-email";
 import { WelcomeEmail, welcomeText } from "./welcome";
+import type { TokenSchema } from "@/lib/token-render";
+import {
+  HOUSEHOLD_INVITE_HTML,
+  HOUSEHOLD_INVITE_SUBJECT,
+  HOUSEHOLD_INVITE_TEXT,
+  HOUSEHOLD_INVITE_TOKENS,
+} from "./familypantree/household-invite";
+import {
+  GROUP_INVITE_HTML,
+  GROUP_INVITE_SUBJECT,
+  GROUP_INVITE_TEXT,
+  GROUP_INVITE_TOKENS,
+} from "./familypantree/group-invite";
+import {
+  MAGIC_SIGN_IN_HTML,
+  MAGIC_SIGN_IN_SUBJECT,
+  MAGIC_SIGN_IN_TEXT,
+  MAGIC_SIGN_IN_TOKENS,
+} from "./familypantree/magic-sign-in";
+import {
+  PASSWORD_RESET_HTML as FP_PASSWORD_RESET_HTML,
+  PASSWORD_RESET_SUBJECT as FP_PASSWORD_RESET_SUBJECT,
+  PASSWORD_RESET_TEXT as FP_PASSWORD_RESET_TEXT,
+  PASSWORD_RESET_TOKENS as FP_PASSWORD_RESET_TOKENS,
+} from "./familypantree/password-reset";
 
 /**
  * `transactional` — the recipient's own action caused it. No unsubscribe;
@@ -25,6 +50,7 @@ export type TemplateCategory = "transactional" | "notification";
  * caller-facing `data` schema.
  */
 export interface TemplateDefinition<S extends z.ZodTypeAny> {
+  kind?: "react";
   category: TemplateCategory;
   schema: S;
   subject: (data: z.infer<S>, appName: string) => string;
@@ -34,8 +60,49 @@ export interface TemplateDefinition<S extends z.ZodTypeAny> {
   text: (props: z.infer<S> & { appName: string; unsubscribeUrl?: string }) => string;
 }
 
+/**
+ * A template whose markup is the design handoff's HTML verbatim, with `{token}`
+ * standing in for each fact. Values are escaped per token kind rather than
+ * interpolated, and an unsubstituted placeholder throws — see lib/token-render.
+ *
+ * This exists so an app's own hardened email HTML can be served unchanged. A
+ * port that rewrote it into components could not be diffed against the file a
+ * designer signed off, which is where email markup quietly breaks.
+ */
+export interface TokenTemplateDefinition<S extends z.ZodTypeAny> {
+  kind: "tokens";
+  category: TemplateCategory;
+  schema: S;
+  tokens: TokenSchema;
+  subjectTemplate: string;
+  html: string;
+  textTemplate: string;
+  /**
+   * Token that receives the request's `unsubscribeUrl`, so the visible
+   * preferences link and the List-Unsubscribe header cannot disagree. Notification
+   * templates set this instead of taking the URL as caller data.
+   */
+  unsubscribeToken?: string;
+}
+
+export type AnyTemplateDefinition<S extends z.ZodTypeAny> =
+  | TemplateDefinition<S>
+  | TokenTemplateDefinition<S>;
+
+export function isTokenTemplate(
+  def: AnyTemplateDefinition<z.ZodTypeAny>,
+): def is TokenTemplateDefinition<z.ZodTypeAny> {
+  return def.kind === "tokens";
+}
+
 function define<S extends z.ZodTypeAny>(def: TemplateDefinition<S>) {
   return def;
+}
+
+function defineTokens<S extends z.ZodTypeAny>(
+  def: Omit<TokenTemplateDefinition<S>, "kind">,
+): TokenTemplateDefinition<S> {
+  return { ...def, kind: "tokens" };
 }
 
 export const templates = {
@@ -122,6 +189,79 @@ export const templates = {
     subject: (d) => `${d.inviterName} invited you to ${d.groupName}`,
     component: (props) => React.createElement(GroupInviteEmail, props),
     text: groupInviteText,
+  }),
+  "familypantree-household-invite": defineTokens({
+    category: "notification",
+    tokens: HOUSEHOLD_INVITE_TOKENS,
+    subjectTemplate: HOUSEHOLD_INVITE_SUBJECT,
+    html: HOUSEHOLD_INVITE_HTML,
+    textTemplate: HOUSEHOLD_INVITE_TEXT,
+    // The visible "Manage email preferences" link is the request's
+    // unsubscribeUrl, so it always matches the List-Unsubscribe header.
+    unsubscribeToken: "preferencesUrl",
+    schema: z.object({
+      inviterFirstName: z.string().min(1).max(100),
+      inviterEmail: z.string().email(),
+      householdName: z.string().min(1).max(100),
+      // Display phrases, not numerals: "9 people", "1 person". The app formats
+      // them because "1 people share this one" is the commonest household there is.
+      memberCount: z.string().min(1).max(40),
+      storeCount: z.string().min(1).max(40),
+      stapleCount: z.string().min(1).max(40),
+      joinUrl: z.string().url(),
+      inviteCode: z.string().min(1).max(64),
+      expiresInDays: z.string().min(1).max(40),
+      postalAddress: z.string().min(1).max(200),
+      reportUrl: z.string().min(1).max(300),
+    }),
+  }),
+  "familypantree-group-invite": defineTokens({
+    category: "notification",
+    tokens: GROUP_INVITE_TOKENS,
+    subjectTemplate: GROUP_INVITE_SUBJECT,
+    html: GROUP_INVITE_HTML,
+    textTemplate: GROUP_INVITE_TEXT,
+    unsubscribeToken: "preferencesUrl",
+    schema: z.object({
+      inviterFirstName: z.string().min(1).max(100),
+      groupName: z.string().min(1).max(100),
+      memberCount: z.string().min(1).max(40),
+      recipeCount: z.string().min(1).max(40),
+      joinUrl: z.string().url(),
+      groupCode: z.string().min(1).max(64),
+      postalAddress: z.string().min(1).max(200),
+      reportUrl: z.string().min(1).max(300),
+    }),
+  }),
+  // Transactional: no unsubscribeToken, so preferencesUrl is caller-supplied.
+  // There is no opting out of a password reset.
+  "familypantree-magic-sign-in": defineTokens({
+    category: "transactional",
+    tokens: MAGIC_SIGN_IN_TOKENS,
+    subjectTemplate: MAGIC_SIGN_IN_SUBJECT,
+    html: MAGIC_SIGN_IN_HTML,
+    textTemplate: MAGIC_SIGN_IN_TEXT,
+    schema: z.object({
+      signInUrl: z.string().url(),
+      siteDomain: z.string().min(1).max(100),
+      postalAddress: z.string().min(1).max(200),
+      preferencesUrl: z.string().url(),
+    }),
+  }),
+  "familypantree-password-reset": defineTokens({
+    category: "transactional",
+    tokens: FP_PASSWORD_RESET_TOKENS,
+    subjectTemplate: FP_PASSWORD_RESET_SUBJECT,
+    html: FP_PASSWORD_RESET_HTML,
+    textTemplate: FP_PASSWORD_RESET_TEXT,
+    schema: z.object({
+      resetUrl: z.string().url(),
+      loginUrl: z.string().url(),
+      siteDomain: z.string().min(1).max(100),
+      postalAddress: z.string().min(1).max(200),
+      preferencesUrl: z.string().url(),
+      reportUrl: z.string().min(1).max(300),
+    }),
   }),
   "activity-digest": define({
     category: "notification",

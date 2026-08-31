@@ -15,6 +15,11 @@ describe("template registry", () => {
         "magic-sign-in",
         "household-invite",
         "group-invite",
+        // App-specific templates: FamilyPantree's own design, served verbatim.
+        "familypantree-password-reset",
+        "familypantree-magic-sign-in",
+        "familypantree-household-invite",
+        "familypantree-group-invite",
       ]),
     );
   });

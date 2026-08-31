@@ -35,6 +35,49 @@ export interface TemplateData {
     recipientName?: string;
     expiresIn?: string;
   };
+
+  /**
+   * FamilyPantree's own designs, served as the design handoff's HTML verbatim.
+   * Every field is required — a missing one is a 400, not a half-rendered email.
+   */
+  "familypantree-password-reset": {
+    resetUrl: string;
+    loginUrl: string;
+    siteDomain: string;
+    postalAddress: string;
+    preferencesUrl: string;
+    reportUrl: string;
+  };
+  "familypantree-magic-sign-in": {
+    signInUrl: string;
+    siteDomain: string;
+    postalAddress: string;
+    preferencesUrl: string;
+  };
+  "familypantree-household-invite": {
+    inviterFirstName: string;
+    inviterEmail: string;
+    householdName: string;
+    /** Display phrases, not numerals: "9 people", "1 person". */
+    memberCount: string;
+    storeCount: string;
+    stapleCount: string;
+    joinUrl: string;
+    inviteCode: string;
+    expiresInDays: string;
+    postalAddress: string;
+    reportUrl: string;
+  };
+  "familypantree-group-invite": {
+    inviterFirstName: string;
+    groupName: string;
+    memberCount: string;
+    recipeCount: string;
+    joinUrl: string;
+    groupCode: string;
+    postalAddress: string;
+    reportUrl: string;
+  };
 }
 
 export type TemplateName = keyof TemplateData;
