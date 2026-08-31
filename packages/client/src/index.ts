@@ -74,6 +74,8 @@ export interface TemplateData {
     identifier: string;
     signInUrl: string;
   };
+  /** banter.camp's 8pm digest. A notification: unsubscribeUrl is required. */
+  "banter-recap": { items: string[]; viewUrl: string };
   "familypantree-group-invite": {
     inviterFirstName: string;
     groupName: string;
@@ -108,6 +110,7 @@ export const NOTIFICATION_TEMPLATES = [
   "group-invite",
   "familypantree-household-invite",
   "familypantree-group-invite",
+  "banter-recap",
 ] as const;
 
 export type NotificationTemplate = (typeof NOTIFICATION_TEMPLATES)[number];

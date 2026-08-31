@@ -39,6 +39,7 @@ import {
   BANTER_SIGNIN_TEXT,
   BANTER_SIGNIN_TOKENS,
 } from "./banter/signin";
+import { BanterRecapEmail, banterRecapText } from "./banter/recap";
 
 /**
  * `transactional` — the recipient's own action caused it. No unsubscribe;
@@ -279,6 +280,18 @@ export const templates = {
       identifier: z.string().email(),
       signInUrl: z.string().url(),
     }),
+  }),
+  "banter-recap": define({
+    // A scheduled digest of other people's activity — the recipient did not ask
+    // for this one, so it requires an opt-out.
+    category: "notification",
+    schema: z.object({
+      items: z.array(z.string().min(1).max(300)).min(1).max(50),
+      viewUrl: z.string().url(),
+    }),
+    subject: () => "Your Evening Recap",
+    component: (props) => React.createElement(BanterRecapEmail, props),
+    text: banterRecapText,
   }),
   "activity-digest": define({
     category: "notification",

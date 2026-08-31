@@ -63,3 +63,56 @@ describe("banter-signin", () => {
     expect(t.schema.safeParse(DATA).success).toBe(true);
   });
 });
+
+describe("banter-recap", () => {
+  const DATA = {
+    items: ["Jeff replied to your post", "Sam reacted to your comment"],
+    viewUrl: "https://banter.camp/notifications",
+  };
+  const UNSUB = "https://banter.camp/settings/notifications?token=abc";
+
+  it("is a notification, so the route will demand an opt-out", () => {
+    expect(templates["banter-recap"].category).toBe("notification");
+  });
+
+  it("renders a plaintext part — the original sent HTML only", async () => {
+    const out = await renderTemplate("banter-recap", DATA, "Banter", UNSUB);
+    expect(out.subject).toBe("Your Evening Recap");
+    for (const item of DATA.items) {
+      expect(out.html).toContain(item);
+      expect(out.text).toContain(item);
+    }
+    expect(out.text).toContain(DATA.viewUrl);
+    expect(out.text).not.toContain("<");
+  });
+
+  it("renders a visible opt-out — the original had none", async () => {
+    const out = await renderTemplate("banter-recap", DATA, "Banter", UNSUB);
+    expect(out.html).toContain(UNSUB);
+    expect(out.text).toContain(UNSUB);
+  });
+
+  it("escapes an actor name that contains markup", async () => {
+    const out = await renderTemplate(
+      "banter-recap",
+      { ...DATA, items: ['<img src=x onerror="alert(1)"> replied'] },
+      "Banter",
+      UNSUB,
+    );
+    expect(out.html).not.toContain("<img src=x");
+    expect(out.html).toContain("&lt;img");
+  });
+
+  it("keeps banter's chrome so it reads as the same sender", async () => {
+    const out = await renderTemplate("banter-recap", DATA, "Banter", UNSUB);
+    for (const needle of ["#f3ecd9", "#fdfbf7", "#b34d22", "banter.camp"]) {
+      expect(out.html).toContain(needle);
+    }
+  });
+
+  it("requires at least one item", () => {
+    expect(templates["banter-recap"].schema.safeParse({ ...DATA, items: [] }).success).toBe(
+      false,
+    );
+  });
+});

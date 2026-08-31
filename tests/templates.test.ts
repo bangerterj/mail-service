@@ -21,6 +21,7 @@ describe("template registry", () => {
         "familypantree-household-invite",
         "familypantree-group-invite",
         "banter-signin",
+        "banter-recap",
       ]),
     );
   });
