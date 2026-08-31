@@ -363,3 +363,49 @@ describe("POST /api/send - SES configuration set", () => {
     expect(sent[0].configurationSet).toBeUndefined();
   });
 });
+
+describe("POST /api/send - token template errors", () => {
+  const inviteData = {
+    inviterFirstName: "Jeff",
+    inviterEmail: "jeff@familypantree.com",
+    householdName: "The Bangerters",
+    memberCount: "9 people",
+    storeCount: "3 stores",
+    stapleCount: "42 staples",
+    joinUrl: "https://familypantree.com/join",
+    inviteCode: "abc123",
+    expiresInDays: "7 days",
+    postalAddress: "123 Main St",
+    reportUrl: "mailto:abuse@familypantree.com",
+  };
+
+  it("400s naming the token when a link scheme is refused", async () => {
+    const res = await POST(
+      request({
+        to: "user@example.com",
+        template: "familypantree-household-invite",
+        data: { ...inviteData, reportUrl: "javascript:alert(1)" },
+        unsubscribeUrl: "https://familypantree.com/prefs",
+      }),
+    );
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error.code).toBe("validation_error");
+    expect(body.error.message).toContain("reportUrl");
+    expect(body.error.details.reportUrl).toBeTruthy();
+    expect(sent).toHaveLength(0);
+  });
+
+  it("still sends when every link is allowed", async () => {
+    const res = await POST(
+      request({
+        to: "user@example.com",
+        template: "familypantree-household-invite",
+        data: inviteData,
+        unsubscribeUrl: "https://familypantree.com/prefs",
+      }),
+    );
+    expect(res.status).toBe(202);
+    expect(sent[0].html).toContain("The Bangerters");
+  });
+});

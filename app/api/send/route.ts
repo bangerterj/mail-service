@@ -8,6 +8,7 @@ import { logger, recipientDomains } from "@/lib/logger";
 import { getProvider, ProviderError } from "@/lib/providers";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { renderTemplate } from "@/lib/render";
+import { InvalidTokenValueError } from "@/lib/token-render";
 import { filterSuppressed } from "@/lib/suppression";
 
 export const runtime = "nodejs";
@@ -161,6 +162,21 @@ export async function POST(req: NextRequest) {
     // 8. Respond
     return NextResponse.json({ id, status: "sent" }, { status: 202 });
   } catch (err) {
+    // A caller-supplied value the template refuses (a disallowed link scheme)
+    // is their bug, not ours — name the token and return a 400 rather than a
+    // generic "Unexpected error".
+    if (err instanceof InvalidTokenValueError) {
+      logger.warn("rejected token value", {
+        appId: app.appId,
+        template,
+        token: err.token,
+      });
+      return errorResponse(
+        "validation_error",
+        `Invalid value for "${err.token}" in template "${template}".`,
+        { details: { [err.token]: [err.message] } },
+      );
+    }
     const isProvider = err instanceof ProviderError;
     logger.error("send failed", {
       appId: app.appId,

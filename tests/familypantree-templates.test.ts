@@ -125,6 +125,22 @@ describe("familypantree templates", () => {
     ).rejects.toThrow(/refusing to link/);
   });
 
+  it("tags a bad link scheme as a caller error, naming the token", async () => {
+    const { InvalidTokenValueError } = await import("@/lib/token-render");
+    try {
+      await renderTemplate(
+        "familypantree-household-invite",
+        { ...DATA["familypantree-household-invite"], reportUrl: "javascript:alert(1)" },
+        "Family Pantree",
+        UNSUB,
+      );
+      throw new Error("expected a rejection");
+    } catch (err) {
+      expect(err).toBeInstanceOf(InvalidTokenValueError);
+      expect((err as InstanceType<typeof InvalidTokenValueError>).token).toBe("reportUrl");
+    }
+  });
+
   it("throws rather than shipping an unsubstituted placeholder", async () => {
     const partial = { ...DATA["familypantree-group-invite"] };
     delete (partial as Record<string, string>).groupName;

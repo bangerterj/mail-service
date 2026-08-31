@@ -87,11 +87,24 @@ export type TemplateName = keyof TemplateData;
  * practically need an opt-out, so `unsubscribeUrl` is required for them at the
  * type level — the server also enforces it with a 400.
  */
-export type NotificationTemplate =
-  | "mention"
-  | "activity-digest"
-  | "household-invite"
-  | "group-invite";
+/**
+ * Templates whose category is `notification` on the server.
+ *
+ * A runtime array rather than a bare union so the service can assert this
+ * matches its own registry — a template that is a notification server-side but
+ * transactional here compiles fine and then 400s at send time, which is how
+ * this list silently fell behind once already.
+ */
+export const NOTIFICATION_TEMPLATES = [
+  "mention",
+  "activity-digest",
+  "household-invite",
+  "group-invite",
+  "familypantree-household-invite",
+  "familypantree-group-invite",
+] as const;
+
+export type NotificationTemplate = (typeof NOTIFICATION_TEMPLATES)[number];
 export type TransactionalTemplate = Exclude<TemplateName, NotificationTemplate>;
 
 export type SendRequest<T extends TemplateName> = {

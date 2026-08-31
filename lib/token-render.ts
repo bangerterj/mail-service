@@ -30,6 +30,23 @@ export type TokenKind =
 
 export type TokenSchema = Readonly<Record<string, TokenKind>>;
 
+/**
+ * A value the caller supplied is unusable — currently only a link whose scheme
+ * is not allowed. This is a 400: the request is at fault, not the service, and
+ * the response names the offending token so the caller can fix it. A template
+ * defect (a missing or unsubstituted token) throws a plain Error and stays a
+ * 500, because that is our bug rather than theirs.
+ */
+export class InvalidTokenValueError extends Error {
+  constructor(
+    readonly token: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = "InvalidTokenValueError";
+  }
+}
+
 export type TokenValues<S extends TokenSchema> = Readonly<
   Record<keyof S & string, string>
 >;
@@ -70,7 +87,7 @@ export function render<S extends TokenSchema>(
     }
     // Split/join rather than a RegExp: a token name is a literal, and building
     // a pattern from one invites an escaping bug in the escaping code.
-    out = out.split(`{${name}}`).join(encode(raw, kind, mode));
+    out = out.split(`{${name}}`).join(encode(raw, kind, mode, name));
   }
 
   const leftover = out.match(LEFTOVER);
@@ -111,10 +128,17 @@ export function missingTokens(template: string, schema: TokenSchema): string[] {
 
 /* ------------------------------------------------------------------ */
 
-function encode(raw: string, kind: TokenKind, mode: "html" | "text"): string {
+function encode(
+  raw: string,
+  kind: TokenKind,
+  mode: "html" | "text",
+  name: string,
+): string {
   switch (kind) {
     case "url":
-      return mode === "html" ? escapeHtml(checkUrl(raw)) : checkUrl(raw);
+      return mode === "html"
+        ? escapeHtml(checkUrl(raw, name))
+        : checkUrl(raw, name);
     case "urlPart":
       return encodeURIComponent(raw);
     case "text": {
@@ -127,10 +151,13 @@ function encode(raw: string, kind: TokenKind, mode: "html" | "text"): string {
   }
 }
 
-function checkUrl(raw: string): string {
+function checkUrl(raw: string, name: string): string {
   const url = raw.trim();
   if (!ALLOWED_SCHEMES.some((scheme) => url.toLowerCase().startsWith(scheme))) {
-    throw new Error(`email template: refusing to link to ${url}`);
+    throw new InvalidTokenValueError(
+      name,
+      `refusing to link to ${url} — allowed schemes are ${ALLOWED_SCHEMES.join(", ")}`,
+    );
   }
   return url;
 }

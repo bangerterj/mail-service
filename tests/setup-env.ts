@@ -4,7 +4,13 @@ process.env.APPS = JSON.stringify({
     from: "noreply@alpha.test",
     fromName: "Alpha App",
     replyTo: "support@alpha.test",
-    templates: ["welcome", "password-reset", "mention", "activity-digest"],
+    templates: [
+      "welcome",
+      "password-reset",
+      "mention",
+      "activity-digest",
+      "familypantree-household-invite",
+    ],
   },
   key_live_testbeta0000000000000000000000000: {
     appId: "beta",
