@@ -33,6 +33,12 @@ import {
   PASSWORD_RESET_TEXT as FP_PASSWORD_RESET_TEXT,
   PASSWORD_RESET_TOKENS as FP_PASSWORD_RESET_TOKENS,
 } from "./familypantree/password-reset";
+import {
+  BANTER_SIGNIN_HTML,
+  BANTER_SIGNIN_SUBJECT,
+  BANTER_SIGNIN_TEXT,
+  BANTER_SIGNIN_TOKENS,
+} from "./banter/signin";
 
 /**
  * `transactional` — the recipient's own action caused it. No unsubscribe;
@@ -261,6 +267,17 @@ export const templates = {
       postalAddress: z.string().min(1).max(200),
       preferencesUrl: z.string().url(),
       reportUrl: z.string().min(1).max(300),
+    }),
+  }),
+  "banter-signin": defineTokens({
+    category: "transactional",
+    tokens: BANTER_SIGNIN_TOKENS,
+    subjectTemplate: BANTER_SIGNIN_SUBJECT,
+    html: BANTER_SIGNIN_HTML,
+    textTemplate: BANTER_SIGNIN_TEXT,
+    schema: z.object({
+      identifier: z.string().email(),
+      signInUrl: z.string().url(),
     }),
   }),
   "activity-digest": define({

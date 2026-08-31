@@ -20,6 +20,7 @@ describe("template registry", () => {
         "familypantree-magic-sign-in",
         "familypantree-household-invite",
         "familypantree-group-invite",
+        "banter-signin",
       ]),
     );
   });

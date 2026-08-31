@@ -68,6 +68,12 @@ export interface TemplateData {
     postalAddress: string;
     reportUrl: string;
   };
+  /** banter.camp's sign-in link, its own design served verbatim. */
+  "banter-signin": {
+    /** The address the link was requested for, shown back to the reader. */
+    identifier: string;
+    signInUrl: string;
+  };
   "familypantree-group-invite": {
     inviterFirstName: string;
     groupName: string;
