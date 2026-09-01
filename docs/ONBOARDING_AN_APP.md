@@ -90,6 +90,19 @@ object, not replacing it. Take the existing value from Vercel and merge:
 }
 ```
 
+**The `templates` array must name every template the app actually sends, spelled
+exactly.** The names above are the generic ones — if the app has its own templates
+(`familypantree-household-invite`, `banter-signin`), those exact names go in the array
+too. A template that exists in the registry but is missing from the allowlist is a
+`403 template_not_allowed`, which reads like the template is broken when it is really
+the config. Check what an app is permitted to send:
+
+```bash
+curl -s <service-url>/api/health
+```
+
+That lists every registered template; the allowlist itself lives in `APPS`.
+
 Paste the merged single-line JSON back into the mail-service Vercel project's `APPS`
 (Production + Preview) and redeploy. Confirm both apps appear:
 
@@ -191,6 +204,21 @@ Available templates and their exact `data` shapes:
 | `activity-digest` | `{ period: string; items: Array<{title: string; detail?: string; url?: string}>; actionUrl?: string }` | notification — requires `unsubscribeUrl` |
 | `household-invite` | `{ inviterName: string; householdName: string; acceptUrl: string; shares: string[]; recipientName?: string; expiresIn?: string }` | notification — requires `unsubscribeUrl`. `shares` is the consent panel and is **required** |
 | `group-invite` | `{ inviterName: string; groupName: string; acceptUrl: string; recipientName?: string; expiresIn?: string }` | notification — requires `unsubscribeUrl` |
+
+App-specific templates. These are an app's own design served verbatim, so every field is
+required — there is no generic layout filling the gaps:
+
+| Template | `data` | Notes |
+|---|---|---|
+| `familypantree-password-reset` | `{ resetUrl, loginUrl, siteDomain, postalAddress, preferencesUrl, reportUrl }` | transactional |
+| `familypantree-magic-sign-in` | `{ signInUrl, siteDomain, postalAddress, preferencesUrl }` | transactional |
+| `familypantree-household-invite` | `{ inviterFirstName, inviterEmail, householdName, memberCount, storeCount, stapleCount, joinUrl, inviteCode, expiresInDays, postalAddress, reportUrl }` | notification. Counts are display phrases — `"9 people"`, not `9`. `preferencesUrl` is filled from `unsubscribeUrl`, so do not pass it |
+| `familypantree-group-invite` | `{ inviterFirstName, groupName, memberCount, recipeCount, joinUrl, groupCode, postalAddress, reportUrl }` | notification, same `preferencesUrl` rule |
+| `banter-signin` | `{ identifier, signInUrl }` | transactional |
+| `banter-recap` | `{ items: string[]; viewUrl: string }` | notification — requires `unsubscribeUrl` |
+
+Every one of these must also appear in that app's `templates` allowlist in `APPS`, or the
+send is a `403`. See Part 1, step 5.
 
 #### Invites: household and group are deliberately different emails
 
