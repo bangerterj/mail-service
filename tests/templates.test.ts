@@ -22,6 +22,7 @@ describe("template registry", () => {
         "familypantree-group-invite",
         "banter-signin",
         "banter-recap",
+        "financial-health-daily",
       ]),
     );
   });

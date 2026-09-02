@@ -216,6 +216,7 @@ required — there is no generic layout filling the gaps:
 | `familypantree-group-invite` | `{ inviterFirstName, groupName, memberCount, recipeCount, joinUrl, groupCode, postalAddress, reportUrl }` | notification, same `preferencesUrl` rule |
 | `banter-signin` | `{ identifier, signInUrl }` | transactional |
 | `banter-recap` | `{ items: string[]; viewUrl: string }` | notification — requires `unsubscribeUrl` |
+| `financial-health-daily` | `{ reportDate, dayOfMonth, daysInMonth, budget, spent, baselinePerDay, yesterday[], categories[], upcoming[], committedEvents?[], savedLastMonth?{}, subscriptions{}, dailyLine?, committed{}, syncedAt, appUrl }` | notification — requires `unsubscribeUrl`. Money Mountain's 4:30am budget report; the subject is computed from the data. Field shapes in `packages/client` |
 
 Every one of these must also appear in that app's `templates` allowlist in `APPS`, or the
 send is a `403`. See Part 1, step 5.
