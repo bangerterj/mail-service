@@ -76,6 +76,37 @@ export interface TemplateData {
   };
   /** banter.camp's 8pm digest. A notification: unsubscribeUrl is required. */
   "banter-recap": { items: string[]; viewUrl: string };
+  /**
+   * Money Mountain's daily budget report. A notification: unsubscribeUrl is
+   * required. Amounts are numbers in whole dollars; the template formats them.
+   */
+  "financial-health-daily": {
+    reportDate: string;
+    dayOfMonth: number;
+    daysInMonth: number;
+    discretionaryBudget: number;
+    spentMtd: number;
+    expectedByToday: number;
+    yesterday: Array<{
+      merchant: string;
+      amount: number;
+      category: string;
+      pending?: boolean;
+      uncategorized?: boolean;
+      fixUrl?: string;
+    }>;
+    categories: Array<{ name: string; mtd: number; typical: number; needed?: boolean }>;
+    upcoming: Array<{ label: string; amount: number; due: string; setAside: number }>;
+    subscriptions: {
+      count: number;
+      monthlyTotal: number;
+      chargedThisMonth: Array<{ merchant: string; amount: number }>;
+      priceChanges: Array<{ merchant: string; from: number; to: number }>;
+    };
+    committed: { total: number; lines: Array<{ label: string; amount: number }> };
+    syncedAt: string;
+    appUrl: string;
+  };
   "familypantree-group-invite": {
     inviterFirstName: string;
     groupName: string;
@@ -111,6 +142,7 @@ export const NOTIFICATION_TEMPLATES = [
   "familypantree-household-invite",
   "familypantree-group-invite",
   "banter-recap",
+  "financial-health-daily",
 ] as const;
 
 export type NotificationTemplate = (typeof NOTIFICATION_TEMPLATES)[number];

@@ -40,6 +40,11 @@ import {
   BANTER_SIGNIN_TOKENS,
 } from "./banter/signin";
 import { BanterRecapEmail, banterRecapText } from "./banter/recap";
+import {
+  FinancialHealthDailyEmail,
+  financialHealthDailySubject,
+  financialHealthDailyText,
+} from "./financial-health/daily";
 
 /**
  * `transactional` — the recipient's own action caused it. No unsubscribe;
@@ -292,6 +297,70 @@ export const templates = {
     subject: () => "Your Evening Recap",
     component: (props) => React.createElement(BanterRecapEmail, props),
     text: banterRecapText,
+  }),
+  "financial-health-daily": define({
+    // Money Mountain's 4:30am budget report. A scheduled digest of the
+    // household's own bank activity — nobody asked for it that morning, so it
+    // carries an opt-out. The subject is computed from the data because it is
+    // meant to tell the whole story unopened: "Tue Sep 2 · $2,357 left · over pace".
+    category: "notification",
+    schema: z.object({
+      reportDate: z.string().min(1).max(40),
+      dayOfMonth: z.number().int().min(1).max(31),
+      daysInMonth: z.number().int().min(28).max(31),
+      discretionaryBudget: z.number().finite(),
+      spentMtd: z.number().finite(),
+      expectedByToday: z.number().finite(),
+      yesterday: z
+        .array(
+          z.object({
+            merchant: z.string().min(1).max(120),
+            amount: z.number().finite(),
+            category: z.string().max(80),
+            pending: z.boolean().optional(),
+            uncategorized: z.boolean().optional(),
+            fixUrl: z.string().url().optional(),
+          }),
+        )
+        .max(100),
+      categories: z
+        .array(
+          z.object({
+            name: z.string().min(1).max(80),
+            mtd: z.number().finite(),
+            typical: z.number().finite(),
+            needed: z.boolean().optional(),
+          }),
+        )
+        .max(40),
+      upcoming: z
+        .array(
+          z.object({
+            label: z.string().min(1).max(80),
+            amount: z.number().finite(),
+            due: z.string().min(1).max(60),
+            setAside: z.number().finite(),
+          }),
+        )
+        .max(20),
+      subscriptions: z.object({
+        count: z.number().int().min(0),
+        monthlyTotal: z.number().finite(),
+        chargedThisMonth: z.array(z.object({ merchant: z.string().min(1).max(80), amount: z.number().finite() })).max(50),
+        priceChanges: z
+          .array(z.object({ merchant: z.string().min(1).max(80), from: z.number().finite(), to: z.number().finite() }))
+          .max(20),
+      }),
+      committed: z.object({
+        total: z.number().finite(),
+        lines: z.array(z.object({ label: z.string().min(1).max(60), amount: z.number().finite() })).max(20),
+      }),
+      syncedAt: z.string().min(1).max(40),
+      appUrl: z.string().url(),
+    }),
+    subject: (d, appName) => financialHealthDailySubject({ ...d, appName }),
+    component: (props) => React.createElement(FinancialHealthDailyEmail, props),
+    text: financialHealthDailyText,
   }),
   "activity-digest": define({
     category: "notification",
