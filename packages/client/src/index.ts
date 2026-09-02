@@ -81,29 +81,46 @@ export interface TemplateData {
    * required. Amounts are numbers in whole dollars; the template formats them.
    */
   "financial-health-daily": {
+    /** "Tue Sep 15" */
     reportDate: string;
     dayOfMonth: number;
     daysInMonth: number;
-    discretionaryBudget: number;
-    spentMtd: number;
-    expectedByToday: number;
+    /** The monthly limit with committed costs stripped out. */
+    budget: number;
+    /** Discretionary spend month-to-date. */
+    spent: number;
+    /** budget / days in the month. */
+    baselinePerDay: number;
     yesterday: Array<{
       merchant: string;
       amount: number;
       category: string;
       pending?: boolean;
+      needed?: boolean;
       uncategorized?: boolean;
       fixUrl?: string;
     }>;
-    categories: Array<{ name: string; mtd: number; typical: number; needed?: boolean }>;
-    upcoming: Array<{ label: string; amount: number; due: string; setAside: number }>;
+    categories: Array<{ name: string; spent: number; typical: number; needed?: boolean }>;
+    upcoming: Array<{ label: string; total: number; setAside: number; due: string; accrual?: string }>;
+    committedEvents?: Array<{ text: string }>;
+    savedLastMonth?: {
+      month: string;
+      lines: Array<{ label: string; amount: number }>;
+      total: number;
+      projection?: string;
+      progress?: string;
+    };
     subscriptions: {
       count: number;
       monthlyTotal: number;
-      chargedThisMonth: Array<{ merchant: string; amount: number }>;
-      priceChanges: Array<{ merchant: string; from: number; to: number }>;
+      chargedCount: number;
+      chargedTotal: number;
+      charged: Array<{ merchant: string; amount: number; date?: string; priceFrom?: number }>;
+      stillToCharge?: { names: string[]; total: number };
     };
+    dailyLine?: string;
     committed: { total: number; lines: Array<{ label: string; amount: number }> };
+    /** "Sep 15, 4:28am" */
     syncedAt: string;
     appUrl: string;
   };
