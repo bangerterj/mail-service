@@ -151,6 +151,8 @@ export interface TemplateData {
     person?: { name: string; share: number };
     /** The household total behind a personal hero. */
     household?: { budget: number; spent: number };
+    /** Everything that left the account this month, budget or no budget. */
+    monthToDate?: { total: number; committed: number; discretionary: number; setAside: number };
     dailyLine?: string;
     committed: { total: number; lines: Array<{ label: string; amount: number }> };
     /** "Sep 15, 4:28am" */

@@ -13,6 +13,30 @@ const render = async (data: Record<string, unknown> = DATA) => {
 };
 
 describe("financial-health-daily", () => {
+  describe("all spending this month", () => {
+    const MTD = { ...DATA, monthToDate: { total: 20239, committed: 7000, discretionary: 12049, setAside: 1190 } };
+
+    it("shows the whole picture, not just the budgeted part", async () => {
+      const out = await render(MTD);
+      expect(out.html).toContain("All spending this month");
+      expect(out.html).toContain("$20,239");
+      expect(out.text).toContain("$7,000 committed · $12,049 budgeted · $1,190 set aside");
+    });
+
+    it("omits the set-aside part when there is none", async () => {
+      // "set aside" also heads the Coming up column, so the assertion has to
+      // name this line rather than the phrase.
+      const out = await render({ ...MTD, monthToDate: { total: 19049, committed: 7000, discretionary: 12049, setAside: 0 } });
+      expect(out.text).toContain("$7,000 committed · $12,049 budgeted");
+      expect(out.text).not.toContain("$0 set aside");
+      expect(out.text).not.toContain("budgeted ·");
+    });
+
+    it("says nothing at all when the app sends no total", async () => {
+      expect((await render()).html).not.toContain("All spending this month");
+    });
+  });
+
   describe("carve-outs", () => {
     const CHEMO = {
       ...DATA,

@@ -419,6 +419,14 @@ export const templates = {
       }),
       person: z.object({ name: z.string().min(1).max(60), share: z.number().finite() }).optional(),
       household: z.object({ budget: z.number().finite(), spent: z.number().finite() }).optional(),
+      monthToDate: z
+        .object({
+          total: z.number(),
+          committed: z.number(),
+          discretionary: z.number(),
+          setAside: z.number(),
+        })
+        .optional(),
       dailyLine: z.string().max(200).optional(),
       committed: z.object({
         total: z.number().finite(),
