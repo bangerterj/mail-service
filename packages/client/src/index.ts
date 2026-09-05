@@ -111,8 +111,18 @@ export interface TemplateData {
      */
     exceptional?: {
       monthTotal: number;
-      lines: Array<{ label: string; month: number; running: number; note?: string }>;
+      lines: Array<{
+        label: string;
+        month: number;
+        running: number;
+        note?: string;
+        expectedTotal?: number;
+        count?: number;
+        expectedCount?: number;
+        through?: string;
+      }>;
       yesterday: Array<{ merchant: string; amount: number; label: string }>;
+      funding?: { needed: number; offsetSoFar: number; typicalMonth: number; budgetMonth: number; note: string };
     };
     savedLastMonth?: {
       month: string;

@@ -359,6 +359,10 @@ export const templates = {
                 month: z.number(),
                 running: z.number(),
                 note: z.string().max(120).optional(),
+                expectedTotal: z.number().optional(),
+                count: z.number().int().optional(),
+                expectedCount: z.number().int().optional(),
+                through: z.string().max(20).optional(),
               }),
             )
             .max(6),
@@ -371,6 +375,15 @@ export const templates = {
               }),
             )
             .max(20),
+          funding: z
+            .object({
+              needed: z.number(),
+              offsetSoFar: z.number(),
+              typicalMonth: z.number(),
+              budgetMonth: z.number(),
+              note: z.string().min(1).max(300),
+            })
+            .optional(),
         })
         .optional(),
       savedLastMonth: z

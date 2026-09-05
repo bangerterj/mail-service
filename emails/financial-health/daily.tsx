@@ -116,8 +116,24 @@ export interface FinancialHealthDailyProps {
    */
   exceptional?: {
     monthTotal: number;
-    lines: Array<{ label: string; month: number; running: number; note?: string }>;
+    lines: Array<{
+      label: string;
+      month: number;
+      running: number;
+      note?: string;
+      /** Set when the carve-out has a known size: 8 treatments, ~$8,000. */
+      expectedTotal?: number;
+      count?: number;
+      expectedCount?: number;
+      through?: string;
+    }>;
     yesterday: Array<{ merchant: string; amount: number; label: string }>;
+    /**
+     * How the household is paying for it out of its own restraint. `note` is
+     * composed by the app so the email and the page cannot drift into saying
+     * different things about the same money.
+     */
+    funding?: { needed: number; offsetSoFar: number; typicalMonth: number; budgetMonth: number; note: string };
   };
   savedLastMonth?: SavedLastMonth;
   subscriptions: SubscriptionsBlock;
@@ -570,7 +586,15 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
                                   <tr key={l.label}>
                                     <td style={lab}>
                                       {l.label}
-                                      {l.note ? <div style={rowSub}>{l.note}</div> : null}
+                                      {(() => {
+                                        const bits = [
+                                          l.expectedCount ? `${l.count ?? 0} of ${l.expectedCount}` : null,
+                                          l.expectedTotal ? `${money(l.running)} of about ${money(l.expectedTotal)}` : null,
+                                          l.through ? `through ${l.through}` : null,
+                                          l.note,
+                                        ].filter(Boolean);
+                                        return bits.length > 0 ? <div style={rowSub}>{bits.join(" · ")}</div> : null;
+                                      })()}
                                     </td>
                                     <td align="right" style={amt}>
                                       {money(l.month)} <span style={{ fontWeight: 500, color: MUTED }}>/ {money(l.running)}</span>
@@ -585,10 +609,43 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
                               Yesterday: {p.exceptional.yesterday.map((y) => `${y.merchant} ${money(y.amount)}`).join(", ")}.
                             </div>
                           ) : null}
-                          <div style={{ marginTop: "12px", fontSize: "11px", lineHeight: 1.6, color: MUTED }}>
-                            Real money, and not counted against the budget above — these are not habits
-                            to change. The budget stays where it is so it still means something.
-                          </div>
+                          {p.exceptional.funding ? (
+                            (() => {
+                              const f = p.exceptional!.funding!;
+                              const pct = Math.min(100, Math.max(0, Math.round((f.offsetSoFar / f.needed) * 100)));
+                              const rest = 100 - pct;
+                              return (
+                                <div style={{ marginTop: "14px" }}>
+                                  <table {...T} width="100%" style={{ width: "100%", borderCollapse: "collapse" }}>
+                                    <tbody>
+                                      <tr>
+                                        <td style={{ fontSize: "11px", color: MUTED, paddingBottom: "4px" }}>
+                                          Paid for by spending less
+                                        </td>
+                                        <td align="right" style={{ fontSize: "11px", color: MUTED, paddingBottom: "4px" }}>
+                                          {money(Math.max(0, f.offsetSoFar))} of {money(f.needed)}
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                  <table {...T} width="100%" style={{ width: "100%", borderCollapse: "collapse", background: RULE, borderRadius: "5px" }}>
+                                    <tbody>
+                                      <tr>
+                                        {pct > 0 ? <td width={`${pct}%`} height={8} style={cell({ background: FOREST })}>&nbsp;</td> : null}
+                                        {rest > 0 ? <td width={`${rest}%`} height={8} style={cell({ background: RULE })}>&nbsp;</td> : null}
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                  <div style={{ marginTop: "8px", fontSize: "11.5px", lineHeight: 1.6, color: INK }}>{f.note}</div>
+                                </div>
+                              );
+                            })()
+                          ) : (
+                            <div style={{ marginTop: "12px", fontSize: "11px", lineHeight: 1.6, color: MUTED }}>
+                              Real money, and not counted against the budget above — these are not habits
+                              to change. The budget stays where it is so it still means something.
+                            </div>
+                          )}
                         </td>
                       </tr>
                     </tbody>
@@ -872,8 +929,20 @@ export function financialHealthDailyText(p: FinancialHealthDailyProps): string {
 
   if (p.exceptional && p.exceptional.lines.length > 0) {
     L.push("", "SET ASIDE FROM THE BUDGET (this month / so far)");
-    for (const l of p.exceptional.lines) L.push(`${l.label} ${money(l.month)} / ${money(l.running)}${l.note ? ` · ${l.note}` : ""}`);
-    L.push("Real money, and not counted against the budget above.");
+    for (const l of p.exceptional.lines) {
+      const bits = [
+        l.expectedCount ? `${l.count ?? 0} of ${l.expectedCount}` : null,
+        l.through ? `through ${l.through}` : null,
+        l.note,
+      ].filter(Boolean);
+      L.push(`${l.label} ${money(l.month)} / ${money(l.running)}${bits.length ? ` · ${bits.join(" · ")}` : ""}`);
+    }
+    if (p.exceptional.funding) {
+      L.push(`Paid for by spending less: ${money(Math.max(0, p.exceptional.funding.offsetSoFar))} of ${money(p.exceptional.funding.needed)}.`);
+      L.push(p.exceptional.funding.note);
+    } else {
+      L.push("Real money, and not counted against the budget above.");
+    }
   }
 
   if (p.upcoming.length > 0 || (p.committedEvents?.length ?? 0) > 0) {
