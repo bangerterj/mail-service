@@ -165,6 +165,15 @@ export interface FinancialHealthDailyProps {
   /** The household total behind a personal hero, for one line of context. */
   household?: { budget: number; spent: number };
   /** One observation, chosen by date so both readers see the same line. */
+  /**
+   * Everything that left the account this month, budget or no budget.
+   *
+   * The budget above deliberately ignores most of what a household spends —
+   * committed bills are decided, carve-outs are set aside — which answers "how
+   * am I doing this month" and not "what did we actually spend". Both are
+   * worth knowing, and only one of them was being answered.
+   */
+  monthToDate?: { total: number; committed: number; discretionary: number; setAside: number };
   dailyLine?: string;
   committed: { total: number; lines: Array<{ label: string; amount: number }> };
   /** "Sep 15, 4:28am" */
@@ -869,6 +878,33 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
               </tr>
             ) : null}
 
+            {/* Everything out this month, budget or no budget */}
+            {p.monthToDate ? (
+              <tr>
+                <td style={{ padding: "0 20px 18px" }}>
+                  <table {...T} width="100%" style={card}>
+                    <tbody>
+                      <tr>
+                        <td style={{ ...cardBody, paddingTop: "14px", paddingBottom: "14px" }}>
+                          <div style={{ fontSize: "11px", letterSpacing: "0.4px", textTransform: "uppercase", color: MUTED }}>
+                            All spending this month
+                          </div>
+                          <div style={{ ...NUM, fontSize: "22px", fontWeight: 800, color: INK, padding: "2px 0 0" }}>
+                            {money(p.monthToDate.total)}
+                          </div>
+                          <div style={{ ...NUM, fontSize: "11.5px", color: MUTED, paddingTop: "3px" }}>
+                            {money(p.monthToDate.committed)} committed &middot;{" "}
+                            {money(p.monthToDate.discretionary)} budgeted
+                            {p.monthToDate.setAside > 0 ? ` · ${money(p.monthToDate.setAside)} set aside` : ""}
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            ) : null}
+
             {/* Committed — one quiet line */}
             <tr>
               <td style={{ padding: "0 20px 18px" }}>
@@ -1010,6 +1046,14 @@ export function financialHealthDailyText(p: FinancialHealthDailyProps): string {
   }
 
   if (p.dailyLine) L.push("", `"${p.dailyLine}"`);
+
+  if (p.monthToDate) {
+    L.push("", `ALL SPENDING THIS MONTH — ${money(p.monthToDate.total)}`);
+    L.push(
+      `${money(p.monthToDate.committed)} committed · ${money(p.monthToDate.discretionary)} budgeted` +
+        (p.monthToDate.setAside > 0 ? ` · ${money(p.monthToDate.setAside)} set aside` : ""),
+    );
+  }
 
   L.push("", `${money(p.committed.total)} committed this month — ${p.committed.lines.map((l) => `${l.label} ${money(l.amount)}`).join(", ")}. Handled, not counted.`);
   L.push("", `Open ${p.appName}: ${p.appUrl}`, `Based on the sync at ${p.syncedAt}.`);
