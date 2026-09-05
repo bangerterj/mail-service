@@ -122,7 +122,11 @@ export interface TemplateData {
         through?: string;
       }>;
       yesterday: Array<{ merchant: string; amount: number; label: string }>;
-      funding?: { needed: number; offsetSoFar: number; typicalMonth: number; budgetMonth: number; note: string };
+      funding?: {
+        note: string;
+        progress?: { label: string; current: number; target: number };
+        action?: string;
+      };
     };
     savedLastMonth?: {
       month: string;

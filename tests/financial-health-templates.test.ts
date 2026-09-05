@@ -42,6 +42,32 @@ describe("financial-health-daily", () => {
     it("says nothing when there is nothing set aside", async () => {
       expect((await render()).html).not.toContain("Set aside from the budget");
     });
+
+    const HSA = {
+      ...DATA,
+      exceptional: {
+        monthTotal: 505,
+        lines: [{ label: "Medical (HSA)", month: 505, running: 4503 }],
+        yesterday: [],
+        funding: {
+          note: "Paid from Lively HSA, which has $4,722 left. About 12 months at $377 a month.",
+          action: "You have $2,022 across 13 charges since May 20 still to reimburse.",
+        },
+      },
+    };
+
+    it("carries the nudge to actually claim the money back", async () => {
+      const out = await render(HSA);
+      expect(out.html).toContain("still to reimburse");
+      expect(out.text).toContain(">> You have $2,022 across 13 charges");
+    });
+
+    it("draws no progress bar for a pot that is simply draining", async () => {
+      // There is no honest "target" to measure an HSA balance against, and a
+      // bar with an invented denominator would be decoration posing as fact.
+      const out = await render(HSA);
+      expect(out.html).not.toContain("Paid for by spending less");
+    });
   });
 
   it("is a notification — a scheduled digest nobody asked for that morning", () => {

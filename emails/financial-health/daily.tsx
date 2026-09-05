@@ -129,11 +129,19 @@ export interface FinancialHealthDailyProps {
     }>;
     yesterday: Array<{ merchant: string; amount: number; label: string }>;
     /**
-     * How the household is paying for it out of its own restraint. `note` is
-     * composed by the app so the email and the page cannot drift into saying
-     * different things about the same money.
+     * How it is being paid for. `note` is composed by the app so the email and
+     * the budget page cannot drift into saying different things about the same
+     * money. `progress` comes only with a real pair of numbers to draw a bar
+     * from — restraint against a known cost. A pot that is simply draining has
+     * no meaningful target, and inventing one to get a bar would be decoration
+     * standing in for information.
      */
-    funding?: { needed: number; offsetSoFar: number; typicalMonth: number; budgetMonth: number; note: string };
+    funding?: {
+      note: string;
+      progress?: { label: string; current: number; target: number };
+      /** The one thing to go and do — a claim that is owed and unfiled. */
+      action?: string;
+    };
   };
   savedLastMonth?: SavedLastMonth;
   subscriptions: SubscriptionsBlock;
@@ -612,31 +620,51 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
                           {p.exceptional.funding ? (
                             (() => {
                               const f = p.exceptional!.funding!;
-                              const pct = Math.min(100, Math.max(0, Math.round((f.offsetSoFar / f.needed) * 100)));
+                              const g = f.progress;
+                              const pct = g ? Math.min(100, Math.max(0, Math.round((g.current / g.target) * 100))) : 0;
                               const rest = 100 - pct;
                               return (
                                 <div style={{ marginTop: "14px" }}>
-                                  <table {...T} width="100%" style={{ width: "100%", borderCollapse: "collapse" }}>
-                                    <tbody>
-                                      <tr>
-                                        <td style={{ fontSize: "11px", color: MUTED, paddingBottom: "4px" }}>
-                                          Paid for by spending less
-                                        </td>
-                                        <td align="right" style={{ fontSize: "11px", color: MUTED, paddingBottom: "4px" }}>
-                                          {money(Math.max(0, f.offsetSoFar))} of {money(f.needed)}
-                                        </td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
-                                  <table {...T} width="100%" style={{ width: "100%", borderCollapse: "collapse", background: RULE, borderRadius: "5px" }}>
-                                    <tbody>
-                                      <tr>
-                                        {pct > 0 ? <td width={`${pct}%`} height={8} style={cell({ background: FOREST })}>&nbsp;</td> : null}
-                                        {rest > 0 ? <td width={`${rest}%`} height={8} style={cell({ background: RULE })}>&nbsp;</td> : null}
-                                      </tr>
-                                    </tbody>
-                                  </table>
-                                  <div style={{ marginTop: "8px", fontSize: "11.5px", lineHeight: 1.6, color: INK }}>{f.note}</div>
+                                  {g ? (
+                                    <>
+                                      <table {...T} width="100%" style={{ width: "100%", borderCollapse: "collapse" }}>
+                                        <tbody>
+                                          <tr>
+                                            <td style={{ fontSize: "11px", color: MUTED, paddingBottom: "4px" }}>{g.label}</td>
+                                            <td align="right" style={{ fontSize: "11px", color: MUTED, paddingBottom: "4px" }}>
+                                              {money(g.current)} of {money(g.target)}
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                      <table {...T} width="100%" style={{ width: "100%", borderCollapse: "collapse", background: RULE, borderRadius: "5px" }}>
+                                        <tbody>
+                                          <tr>
+                                            {pct > 0 ? <td width={`${pct}%`} height={8} style={cell({ background: FOREST })}>&nbsp;</td> : null}
+                                            {rest > 0 ? <td width={`${rest}%`} height={8} style={cell({ background: RULE })}>&nbsp;</td> : null}
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </>
+                                  ) : null}
+                                  <div style={{ marginTop: g ? "8px" : "0", fontSize: "11.5px", lineHeight: 1.6, color: INK }}>{f.note}</div>
+                                  {f.action ? (
+                                    <div
+                                      style={{
+                                        marginTop: "10px",
+                                        padding: "10px 12px",
+                                        background: RULE,
+                                        border: `1.5px solid ${INK}`,
+                                        borderRadius: "9px",
+                                        fontSize: "12px",
+                                        fontWeight: 600,
+                                        lineHeight: 1.5,
+                                        color: INK,
+                                      }}
+                                    >
+                                      {f.action}
+                                    </div>
+                                  ) : null}
                                 </div>
                               );
                             })()
@@ -938,8 +966,10 @@ export function financialHealthDailyText(p: FinancialHealthDailyProps): string {
       L.push(`${l.label} ${money(l.month)} / ${money(l.running)}${bits.length ? ` · ${bits.join(" · ")}` : ""}`);
     }
     if (p.exceptional.funding) {
-      L.push(`Paid for by spending less: ${money(Math.max(0, p.exceptional.funding.offsetSoFar))} of ${money(p.exceptional.funding.needed)}.`);
+      const g = p.exceptional.funding.progress;
+      if (g) L.push(`${g.label}: ${money(g.current)} of ${money(g.target)}.`);
       L.push(p.exceptional.funding.note);
+      if (p.exceptional.funding.action) L.push(`>> ${p.exceptional.funding.action}`);
     } else {
       L.push("Real money, and not counted against the budget above.");
     }

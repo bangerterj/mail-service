@@ -377,11 +377,15 @@ export const templates = {
             .max(20),
           funding: z
             .object({
-              needed: z.number(),
-              offsetSoFar: z.number(),
-              typicalMonth: z.number(),
-              budgetMonth: z.number(),
               note: z.string().min(1).max(300),
+              progress: z
+                .object({
+                  label: z.string().min(1).max(60),
+                  current: z.number(),
+                  target: z.number().positive(),
+                })
+                .optional(),
+              action: z.string().max(200).optional(),
             })
             .optional(),
         })
