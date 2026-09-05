@@ -108,6 +108,17 @@ export interface FinancialHealthDailyProps {
   categories: DailyCategory[];
   upcoming: DailyUpcoming[];
   committedEvents?: CommittedEvent[];
+  /**
+   * Spending deliberately carved out of the budget above — a course of
+   * veterinary chemotherapy, a funeral, a flood. Real money, reported under
+   * its own name with a running total, and not counted against the limit:
+   * a limit that a one-off makes unmeetable stops being read at all.
+   */
+  exceptional?: {
+    monthTotal: number;
+    lines: Array<{ label: string; month: number; running: number; note?: string }>;
+    yesterday: Array<{ merchant: string; amount: number; label: string }>;
+  };
   savedLastMonth?: SavedLastMonth;
   subscriptions: SubscriptionsBlock;
   /**
@@ -529,6 +540,63 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
               </tr>
             ) : null}
 
+            {/* Set aside from the budget */}
+            {p.exceptional && p.exceptional.lines.length > 0 ? (
+              <tr>
+                <td style={{ padding: "0 20px 20px" }}>
+                  <table {...T} width="100%" style={card}>
+                    <tbody>
+                      <tr>
+                        <td style={cardHead}>
+                          <table {...T} width="100%" style={{ width: "100%", borderCollapse: "collapse" }}>
+                            <tbody>
+                              <tr>
+                                <td style={h2}>Set aside from the budget</td>
+                                <td align="right" style={meta}>this month / so far</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={cardBody}>
+                          <table {...T} width="100%" style={{ width: "100%", borderCollapse: "collapse" }}>
+                            <tbody>
+                              {p.exceptional.lines.map((l, i) => {
+                                const last = i === p.exceptional!.lines.length - 1;
+                                const lab = last ? { ...rowLabel, padding: "9px 0 2px", borderBottom: "none" } : rowLabel;
+                                const amt = last ? { ...rowAmt, fontSize: "14px", padding: "9px 0 2px", borderBottom: "none" } : { ...rowAmt, fontSize: "14px" };
+                                return (
+                                  <tr key={l.label}>
+                                    <td style={lab}>
+                                      {l.label}
+                                      {l.note ? <div style={rowSub}>{l.note}</div> : null}
+                                    </td>
+                                    <td align="right" style={amt}>
+                                      {money(l.month)} <span style={{ fontWeight: 500, color: MUTED }}>/ {money(l.running)}</span>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                          {p.exceptional.yesterday.length > 0 ? (
+                            <div style={{ marginTop: "12px", fontSize: "12px", lineHeight: 1.5, color: MUTED }}>
+                              Yesterday: {p.exceptional.yesterday.map((y) => `${y.merchant} ${money(y.amount)}`).join(", ")}.
+                            </div>
+                          ) : null}
+                          <div style={{ marginTop: "12px", fontSize: "11px", lineHeight: 1.6, color: MUTED }}>
+                            Real money, and not counted against the budget above — these are not habits
+                            to change. The budget stays where it is so it still means something.
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            ) : null}
+
             {/* Coming up */}
             {p.upcoming.length > 0 || (p.committedEvents?.length ?? 0) > 0 ? (
               <tr>
@@ -800,6 +868,12 @@ export function financialHealthDailyText(p: FinancialHealthDailyProps): string {
     for (const c of cats) L.push(`${c.name}${c.needed ? "*" : ""} ${money(c.spent)} / ${money(c.typical)}`);
     if (cats.some((c) => c.needed)) L.push("* needed — inside the budget, not a choice.");
     L.push(`${Math.round(((p.dayOfMonth - 1) / p.daysInMonth) * 100)}% of the month has passed.`);
+  }
+
+  if (p.exceptional && p.exceptional.lines.length > 0) {
+    L.push("", "SET ASIDE FROM THE BUDGET (this month / so far)");
+    for (const l of p.exceptional.lines) L.push(`${l.label} ${money(l.month)} / ${money(l.running)}${l.note ? ` · ${l.note}` : ""}`);
+    L.push("Real money, and not counted against the budget above.");
   }
 
   if (p.upcoming.length > 0 || (p.committedEvents?.length ?? 0) > 0) {

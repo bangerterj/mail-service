@@ -13,6 +13,37 @@ const render = async (data: Record<string, unknown> = DATA) => {
 };
 
 describe("financial-health-daily", () => {
+  describe("carve-outs", () => {
+    const CHEMO = {
+      ...DATA,
+      exceptional: {
+        monthTotal: 2140,
+        lines: [{ label: "Ruby's chemo", month: 2140, running: 6820, note: "Rise Pet Care, from March" }],
+        yesterday: [{ merchant: "Rise Pet Care", amount: 1070, label: "Ruby's chemo" }],
+      },
+    };
+
+    it("reports the carve-out under its own name, with what it has cost so far", async () => {
+      const out = await render(CHEMO);
+      expect(out.html).toContain("Set aside from the budget");
+      expect(out.html).toContain("Ruby&#x27;s chemo");
+      expect(out.html).toContain("$6,820");
+      expect(out.text).toContain("Ruby's chemo $2,140 / $6,820");
+    });
+
+    it("leaves the budget itself untouched — that is the whole point", async () => {
+      const plain = await render();
+      const carved = await render(CHEMO);
+      // Same limit, same spend, same subject line: the $2,140 changed nothing
+      // about what the household is being asked to do differently.
+      expect(carved.subject).toBe(plain.subject);
+    });
+
+    it("says nothing when there is nothing set aside", async () => {
+      expect((await render()).html).not.toContain("Set aside from the budget");
+    });
+  });
+
   it("is a notification — a scheduled digest nobody asked for that morning", () => {
     expect(templates["financial-health-daily"].category).toBe("notification");
   });

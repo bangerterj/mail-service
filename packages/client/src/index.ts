@@ -105,6 +105,15 @@ export interface TemplateData {
     categories: Array<{ name: string; spent: number; typical: number; needed?: boolean }>;
     upcoming: Array<{ label: string; total: number; setAside: number; due: string; accrual?: string }>;
     committedEvents?: Array<{ text: string }>;
+    /**
+     * Spending deliberately carved out of the budget — reported under its own
+     * name with a running total, and not counted against the monthly limit.
+     */
+    exceptional?: {
+      monthTotal: number;
+      lines: Array<{ label: string; month: number; running: number; note?: string }>;
+      yesterday: Array<{ merchant: string; amount: number; label: string }>;
+    };
     savedLastMonth?: {
       month: string;
       lines: Array<{ label: string; amount: number }>;

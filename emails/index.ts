@@ -348,6 +348,31 @@ export const templates = {
         )
         .max(20),
       committedEvents: z.array(z.object({ text: z.string().min(1).max(200) })).max(10).optional(),
+      // Named carve-outs: reported, and not counted against the budget.
+      exceptional: z
+        .object({
+          monthTotal: z.number(),
+          lines: z
+            .array(
+              z.object({
+                label: z.string().min(1).max(60),
+                month: z.number(),
+                running: z.number(),
+                note: z.string().max(120).optional(),
+              }),
+            )
+            .max(6),
+          yesterday: z
+            .array(
+              z.object({
+                merchant: z.string().min(1).max(60),
+                amount: z.number(),
+                label: z.string().min(1).max(60),
+              }),
+            )
+            .max(20),
+        })
+        .optional(),
       savedLastMonth: z
         .object({
           month: z.string().min(1).max(20),
