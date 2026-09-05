@@ -99,6 +99,8 @@ export interface TemplateData {
       needed?: boolean;
       uncategorized?: boolean;
       fixUrl?: string;
+      /** Whose charge it is. Omit or "Joint" for shared spending. */
+      owner?: string;
     }>;
     categories: Array<{ name: string; spent: number; typical: number; needed?: boolean }>;
     upcoming: Array<{ label: string; total: number; setAside: number; due: string; accrual?: string }>;
@@ -118,6 +120,13 @@ export interface TemplateData {
       charged: Array<{ merchant: string; amount: number; date?: string; priceFrom?: number }>;
       stillToCharge?: { names: string[]; total: number };
     };
+    /**
+     * Set for a per-person copy, in which case budget/spent above are already
+     * that person's half. `share` is what yesterday cost this reader.
+     */
+    person?: { name: string; share: number };
+    /** The household total behind a personal hero. */
+    household?: { budget: number; spent: number };
     dailyLine?: string;
     committed: { total: number; lines: Array<{ label: string; amount: number }> };
     /** "Sep 15, 4:28am" */

@@ -32,6 +32,8 @@ export interface DailyTransaction {
   /** No category yet. Rendered as a "Categorize" pill when `fixUrl` is given. */
   uncategorized?: boolean;
   fixUrl?: string;
+  /** Whose charge it is. Omitted or "Joint" for shared spending. */
+  owner?: string;
 }
 
 export interface DailyCategory {
@@ -108,6 +110,20 @@ export interface FinancialHealthDailyProps {
   committedEvents?: CommittedEvent[];
   savedLastMonth?: SavedLastMonth;
   subscriptions: SubscriptionsBlock;
+  /**
+   * Set when the household sends one copy per person, in which case `budget`
+   * and `spent` above are already this person's own: their half of the
+   * household budget, and their personal charges plus half of every shared
+   * one. The hero is their number, so pace, the bar and the subject all come
+   * out personal without special cases.
+   *
+   * `share` is what yesterday's charges cost this reader specifically —
+   * the rows still show what the card was actually charged, because a $71
+   * grocery run reading as $36 would not reconcile against a statement.
+   */
+  person?: { name: string; share: number };
+  /** The household total behind a personal hero, for one line of context. */
+  household?: { budget: number; spent: number };
   /** One observation, chosen by date so both readers see the same line. */
   dailyLine?: string;
   committed: { total: number; lines: Array<{ label: string; amount: number }> };
@@ -208,24 +224,45 @@ const cardBody: React.CSSProperties = { padding: "4px 18px 16px" };
 const cell = (extra: React.CSSProperties = {}): React.CSSProperties => ({ fontSize: 0, lineHeight: 0, ...extra });
 const fine: React.CSSProperties = { fontSize: "11px", lineHeight: 1.5, color: MUTED };
 const needTag: React.CSSProperties = { fontWeight: 700, fontSize: "9.5px", letterSpacing: "0.1em", color: MUTED };
+const ownerChip: React.CSSProperties = {
+  display: "inline-block",
+  marginLeft: "6px",
+  padding: "1px 6px",
+  borderRadius: "99px",
+  fontSize: "9.5px",
+  fontWeight: 700,
+  letterSpacing: "0.04em",
+  border: `1px solid ${RULE}`,
+  color: MUTED,
+  verticalAlign: "middle",
+};
+/** The reader's own charges carry a solid chip so their eye lands on them. */
+const ownerChipMine: React.CSSProperties = { ...ownerChip, border: `1px solid ${INK}`, color: INK };
 
 function Bar({ fillPct, notchPct, color, height, showNotch }: { fillPct: number; notchPct: number | null; color: string; height: number; showNotch: boolean }) {
   // Fill, gap to the notch, the notch, remainder. Cells rather than divs so
   // Gmail and Outlook draw it; widths as percentages so it scales to 600px.
+  //
+  // Every cell here is emitted only when it has width. A <td width="0%"> is
+  // not an empty cell — browsers ignore a zero percentage and fall back to
+  // distributing the row evenly, so a category with nothing spent rendered a
+  // green stub the same size as every other empty category's.
   const notch = showNotch && notchPct !== null;
+  const before = notch ? Math.min(fillPct, notchPct) : 0;
   const gap = notch ? Math.max(0, notchPct - fillPct) : 0;
   const afterNotch = notch ? Math.max(0, fillPct - notchPct) : 0;
+  const remainder = notch ? Math.max(0, 100 - Math.max(fillPct, notchPct)) : 0;
   return (
     <table {...T} width="100%" style={{ width: "100%", borderCollapse: "collapse", border: `${height >= 14 ? 1.5 : 1}px solid ${height >= 14 ? INK : "rgba(26,26,15,0.18)"}`, borderRadius: height >= 14 ? "7px" : "5px", overflow: "hidden" }}>
       <tbody>
         <tr>
           {notch ? (
             <>
-              <td width={`${Math.min(fillPct, notchPct)}%`} height={height} style={cell({ background: color })}>&nbsp;</td>
+              {before > 0 ? <td width={`${before}%`} height={height} style={cell({ background: color })}>&nbsp;</td> : null}
               {gap > 0 ? <td width={`${gap}%`} height={height} style={cell({ background: RULE })}>&nbsp;</td> : null}
               <td width={height >= 14 ? 2 : 1} height={height} style={cell({ background: INK })}>&nbsp;</td>
               {afterNotch > 0 ? <td width={`${afterNotch}%`} height={height} style={cell({ background: color })}>&nbsp;</td> : null}
-              <td height={height} style={cell({ background: RULE })}>&nbsp;</td>
+              {remainder > 0 ? <td height={height} style={cell({ background: RULE })}>&nbsp;</td> : null}
             </>
           ) : (
             <>
@@ -304,7 +341,11 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
                   <tbody>
                     <tr>
                       <td style={{ padding: "20px" }}>
-                        <div style={eyebrow}>{d.overBudget ? `Over budget · ${d.daysLeft} ${dayWord(d.daysLeft)}` : `Left to spend · ${d.daysLeft} ${dayWord(d.daysLeft)}`}</div>
+                        <div style={eyebrow}>
+                          {`${p.person ? `${p.person.name}, ` : ""}${
+                            d.overBudget ? "over budget" : "left to spend"
+                          } · ${d.daysLeft} ${dayWord(d.daysLeft)}`}
+                        </div>
                         <div style={{ ...NUM, fontFamily: DISPLAY, fontWeight: 800, fontSize: "44px", lineHeight: 1, letterSpacing: "-1.6px", color: heroColor }}>{money(d.left)}</div>
                         <div style={{ fontSize: "13px", color: MUTED, paddingTop: "6px" }}>
                           {d.overBudget
@@ -332,6 +373,12 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
                             </table>
                           </>
                         ) : null}
+                        {p.household ? (
+                          <div style={{ ...fine, marginTop: "10px" }}>
+                            Together you have spent {money(p.household.spent)} of {money(p.household.budget)}. Half of
+                            everything shared comes out of each of you.
+                          </div>
+                        ) : null}
                       </td>
                     </tr>
                   </tbody>
@@ -351,7 +398,11 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
                             <tr>
                               <td style={h2}>Yesterday</td>
                               <td align="right" style={meta}>
-                                {d.newCount === 0 ? "0 new" : `${d.newCount} new · ${money(d.newTotal)}`}
+                                {d.newCount === 0
+                                  ? "0 new"
+                                  : `${d.newCount} new · ${money(d.newTotal)}${
+                                      p.person ? ` · ${money(p.person.share)} yours` : ""
+                                    }`}
                               </td>
                             </tr>
                           </tbody>
@@ -375,6 +426,9 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
                                   <tr key={i}>
                                     <td style={lab}>
                                       {t.merchant}
+                                      {t.owner && t.owner !== "Joint" ? (
+                                        <span style={t.owner === p.person?.name ? ownerChipMine : ownerChip}>{t.owner}</span>
+                                      ) : null}
                                       <div style={{ ...rowSub, paddingTop: t.uncategorized ? "4px" : "2px" }}>
                                         {t.uncategorized ? (
                                           t.fixUrl ? (
@@ -407,6 +461,12 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
                             </tbody>
                           </table>
                         )}
+                        {p.person && d.newCount > 0 ? (
+                          <div style={fine}>
+                            Unlabelled charges are shared and count half to each of you. A name means it came off that
+                            person&apos;s own card.
+                          </div>
+                        ) : null}
                       </td>
                     </tr>
                   </tbody>
@@ -432,7 +492,7 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
                           </table>
                         </td>
                       </tr>
-                      {p.categories.slice(0, 8).map((c) => {
+                      {p.categories.slice(0, 12).map((c) => {
                         const pct = c.typical > 0 ? Math.min(100, Math.round((c.spent / c.typical) * 100)) : c.spent > 0 ? 100 : 0;
                         const over = c.typical > 0 && c.spent > c.typical;
                         return (
@@ -693,6 +753,7 @@ export function financialHealthDailyText(p: FinancialHealthDailyProps): string {
   const d = derive(p);
   const dayWord = (n: number) => (n === 1 ? "day" : "days");
   const L: string[] = [`${p.appName.toUpperCase()} — ${p.reportDate}, day ${p.dayOfMonth} of ${p.daysInMonth}`, ""];
+  if (p.person) L.push(`For ${p.person.name}`, "");
 
   if (d.overBudget) {
     L.push(`${money(-d.left)} over budget. ${d.daysLeft} ${dayWord(d.daysLeft)} left.`);
@@ -708,7 +769,19 @@ export function financialHealthDailyText(p: FinancialHealthDailyProps): string {
     }
   }
 
-  L.push("", d.newCount === 0 ? "YESTERDAY — 0 new" : `YESTERDAY — ${d.newCount} new, ${money(d.newTotal)}`);
+  if (p.household) {
+    L.push(
+      `Together you have spent ${money(p.household.spent)} of ${money(p.household.budget)}.`,
+      "Half of everything shared comes out of each of you."
+    );
+  }
+
+  L.push(
+    "",
+    d.newCount === 0
+      ? "YESTERDAY — 0 new"
+      : `YESTERDAY — ${d.newCount} new, ${money(d.newTotal)}${p.person ? `, ${money(p.person.share)} yours` : ""}`
+  );
   if (d.newCount === 0) L.push(`No transactions. Sync ran at ${p.syncedAt}.`);
   for (const t of p.yesterday) {
     const flags = [t.needed ? "needed" : null, t.pending ? "pending" : null].filter(Boolean).join(", ");
@@ -716,11 +789,12 @@ export function financialHealthDailyText(p: FinancialHealthDailyProps): string {
       L.push(`${t.merchant} ${money(t.amount)} ${[t.pending ? "pending" : null, "uncategorized"].filter(Boolean).join(", ")}`);
       if (t.fixUrl) L.push(`-> ${t.fixUrl}`);
     } else {
-      L.push(`${t.merchant} ${money(t.amount)} ${t.category}${flags ? ` (${flags})` : ""}`);
+      const who = t.owner && t.owner !== "Joint" ? ` [${t.owner}]` : "";
+      L.push(`${t.merchant} ${money(t.amount)} ${t.category}${flags ? ` (${flags})` : ""}${who}`);
     }
   }
 
-  const cats = p.categories.slice(0, 8);
+  const cats = p.categories.slice(0, 12);
   if (d.paceReadable && cats.length > 0) {
     L.push("", "THIS MONTH BY CATEGORY (spent / typical month)");
     for (const c of cats) L.push(`${c.name}${c.needed ? "*" : ""} ${money(c.spent)} / ${money(c.typical)}`);

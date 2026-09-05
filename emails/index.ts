@@ -322,6 +322,7 @@ export const templates = {
             needed: z.boolean().optional(),
             uncategorized: z.boolean().optional(),
             fixUrl: z.string().url().optional(),
+            owner: z.string().max(60).optional(),
           }),
         )
         .max(100),
@@ -373,6 +374,8 @@ export const templates = {
           .max(50),
         stillToCharge: z.object({ names: z.array(z.string().min(1).max(60)).max(50), total: z.number().finite() }).optional(),
       }),
+      person: z.object({ name: z.string().min(1).max(60), share: z.number().finite() }).optional(),
+      household: z.object({ budget: z.number().finite(), spent: z.number().finite() }).optional(),
       dailyLine: z.string().max(200).optional(),
       committed: z.object({
         total: z.number().finite(),
