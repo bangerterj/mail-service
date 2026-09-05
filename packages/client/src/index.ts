@@ -126,6 +126,7 @@ export interface TemplateData {
         note: string;
         progress?: { label: string; current: number; target: number };
         action?: string;
+        overflow?: string;
       };
     };
     savedLastMonth?: {

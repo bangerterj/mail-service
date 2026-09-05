@@ -141,6 +141,11 @@ export interface FinancialHealthDailyProps {
       progress?: { label: string; current: number; target: number };
       /** The one thing to go and do — a claim that is owed and unfiled. */
       action?: string;
+      /**
+       * Spending past what the pot covers. It is back inside the budget above,
+       * and saying so is the difference between a carve-out and a blind spot.
+       */
+      overflow?: string;
     };
   };
   savedLastMonth?: SavedLastMonth;
@@ -648,6 +653,11 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
                                     </>
                                   ) : null}
                                   <div style={{ marginTop: g ? "8px" : "0", fontSize: "11.5px", lineHeight: 1.6, color: INK }}>{f.note}</div>
+                                  {f.overflow ? (
+                                    <div style={{ marginTop: "8px", fontSize: "11.5px", fontWeight: 600, lineHeight: 1.6, color: INK }}>
+                                      {f.overflow}
+                                    </div>
+                                  ) : null}
                                   {f.action ? (
                                     <div
                                       style={{
@@ -969,6 +979,7 @@ export function financialHealthDailyText(p: FinancialHealthDailyProps): string {
       const g = p.exceptional.funding.progress;
       if (g) L.push(`${g.label}: ${money(g.current)} of ${money(g.target)}.`);
       L.push(p.exceptional.funding.note);
+      if (p.exceptional.funding.overflow) L.push(p.exceptional.funding.overflow);
       if (p.exceptional.funding.action) L.push(`>> ${p.exceptional.funding.action}`);
     } else {
       L.push("Real money, and not counted against the budget above.");

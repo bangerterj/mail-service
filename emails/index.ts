@@ -386,6 +386,7 @@ export const templates = {
                 })
                 .optional(),
               action: z.string().max(200).optional(),
+              overflow: z.string().max(200).optional(),
             })
             .optional(),
         })
