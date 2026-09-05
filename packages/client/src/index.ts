@@ -99,10 +99,36 @@ export interface TemplateData {
       needed?: boolean;
       uncategorized?: boolean;
       fixUrl?: string;
+      /** Whose charge it is. Omit or "Joint" for shared spending. */
+      owner?: string;
     }>;
     categories: Array<{ name: string; spent: number; typical: number; needed?: boolean }>;
     upcoming: Array<{ label: string; total: number; setAside: number; due: string; accrual?: string }>;
     committedEvents?: Array<{ text: string }>;
+    /**
+     * Spending deliberately carved out of the budget — reported under its own
+     * name with a running total, and not counted against the monthly limit.
+     */
+    exceptional?: {
+      monthTotal: number;
+      lines: Array<{
+        label: string;
+        month: number;
+        running: number;
+        note?: string;
+        expectedTotal?: number;
+        count?: number;
+        expectedCount?: number;
+        through?: string;
+      }>;
+      yesterday: Array<{ merchant: string; amount: number; label: string }>;
+      funding?: {
+        note: string;
+        progress?: { label: string; current: number; target: number };
+        action?: string;
+        overflow?: string;
+      };
+    };
     savedLastMonth?: {
       month: string;
       lines: Array<{ label: string; amount: number }>;
@@ -118,6 +144,13 @@ export interface TemplateData {
       charged: Array<{ merchant: string; amount: number; date?: string; priceFrom?: number }>;
       stillToCharge?: { names: string[]; total: number };
     };
+    /**
+     * Set for a per-person copy, in which case budget/spent above are already
+     * that person's half. `share` is what yesterday cost this reader.
+     */
+    person?: { name: string; share: number };
+    /** The household total behind a personal hero. */
+    household?: { budget: number; spent: number };
     dailyLine?: string;
     committed: { total: number; lines: Array<{ label: string; amount: number }> };
     /** "Sep 15, 4:28am" */

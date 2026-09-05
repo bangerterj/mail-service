@@ -322,6 +322,7 @@ export const templates = {
             needed: z.boolean().optional(),
             uncategorized: z.boolean().optional(),
             fixUrl: z.string().url().optional(),
+            owner: z.string().max(60).optional(),
           }),
         )
         .max(100),
@@ -347,6 +348,49 @@ export const templates = {
         )
         .max(20),
       committedEvents: z.array(z.object({ text: z.string().min(1).max(200) })).max(10).optional(),
+      // Named carve-outs: reported, and not counted against the budget.
+      exceptional: z
+        .object({
+          monthTotal: z.number(),
+          lines: z
+            .array(
+              z.object({
+                label: z.string().min(1).max(60),
+                month: z.number(),
+                running: z.number(),
+                note: z.string().max(120).optional(),
+                expectedTotal: z.number().optional(),
+                count: z.number().int().optional(),
+                expectedCount: z.number().int().optional(),
+                through: z.string().max(20).optional(),
+              }),
+            )
+            .max(6),
+          yesterday: z
+            .array(
+              z.object({
+                merchant: z.string().min(1).max(60),
+                amount: z.number(),
+                label: z.string().min(1).max(60),
+              }),
+            )
+            .max(20),
+          funding: z
+            .object({
+              note: z.string().min(1).max(300),
+              progress: z
+                .object({
+                  label: z.string().min(1).max(60),
+                  current: z.number(),
+                  target: z.number().positive(),
+                })
+                .optional(),
+              action: z.string().max(200).optional(),
+              overflow: z.string().max(200).optional(),
+            })
+            .optional(),
+        })
+        .optional(),
       savedLastMonth: z
         .object({
           month: z.string().min(1).max(20),
@@ -373,6 +417,8 @@ export const templates = {
           .max(50),
         stillToCharge: z.object({ names: z.array(z.string().min(1).max(60)).max(50), total: z.number().finite() }).optional(),
       }),
+      person: z.object({ name: z.string().min(1).max(60), share: z.number().finite() }).optional(),
+      household: z.object({ budget: z.number().finite(), spent: z.number().finite() }).optional(),
       dailyLine: z.string().max(200).optional(),
       committed: z.object({
         total: z.number().finite(),
