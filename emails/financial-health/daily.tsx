@@ -34,6 +34,12 @@ export interface DailyTransaction {
   fixUrl?: string;
   /** Whose charge it is. Omitted or "Joint" for shared spending. */
   owner?: string;
+  /**
+   * Set only when the charge is older than the day being reported — a Saturday
+   * charge that reached the bank feed on Monday. Without it the line reads as
+   * yesterday's and quietly misdates the week.
+   */
+  on?: string;
 }
 
 export interface DailyCategory {
@@ -445,7 +451,7 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
                         <table {...T} width="100%" style={{ width: "100%", borderCollapse: "collapse" }}>
                           <tbody>
                             <tr>
-                              <td style={h2}>Yesterday</td>
+                              <td style={h2}>New since your last report</td>
                               <td align="right" style={meta}>
                                 {d.newCount === 0
                                   ? "0 new"
@@ -499,6 +505,7 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
                                             <span style={{ paddingLeft: t.uncategorized ? "4px" : 0, color: AMBER, fontWeight: 600 }}>pending</span>
                                           </>
                                         ) : null}
+                                        {t.on ? <> &middot; {t.on}</> : null}
                                       </div>
                                     </td>
                                     <td align="right" style={{ ...amt, color: t.pending ? MUTED : INK }}>
@@ -978,12 +985,12 @@ export function financialHealthDailyText(p: FinancialHealthDailyProps): string {
   L.push(
     "",
     d.newCount === 0
-      ? "YESTERDAY — 0 new"
-      : `YESTERDAY — ${d.newCount} new, ${money(d.newTotal)}${p.person ? `, ${money(p.person.share)} yours` : ""}`
+      ? "NEW SINCE YOUR LAST REPORT — 0 new"
+      : `NEW SINCE YOUR LAST REPORT — ${d.newCount} new, ${money(d.newTotal)}${p.person ? `, ${money(p.person.share)} yours` : ""}`
   );
   if (d.newCount === 0) L.push(`No transactions. Sync ran at ${p.syncedAt}.`);
   for (const t of p.yesterday) {
-    const flags = [t.needed ? "needed" : null, t.pending ? "pending" : null].filter(Boolean).join(", ");
+    const flags = [t.needed ? "needed" : null, t.pending ? "pending" : null, t.on ?? null].filter(Boolean).join(", ");
     if (t.uncategorized) {
       L.push(`${t.merchant} ${money(t.amount)} ${[t.pending ? "pending" : null, "uncategorized"].filter(Boolean).join(", ")}`);
       if (t.fixUrl) L.push(`-> ${t.fixUrl}`);
