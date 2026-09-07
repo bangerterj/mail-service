@@ -13,6 +13,35 @@ const render = async (data: Record<string, unknown> = DATA) => {
 };
 
 describe("financial-health-daily", () => {
+  describe("late arrivals", () => {
+    // A Saturday card charge reaches the bank feed on Monday. It belongs in
+    // Monday's recap, carrying its own date so the week is not misread.
+    const LATE = {
+      ...DATA,
+      yesterday: [
+        { merchant: "Trader Joe's", amount: 66, category: "Groceries & Meal Kits", pending: true },
+        { merchant: "Salty Bear Brewing", amount: 6, category: "Restaurants & Dining Out", pending: true, on: "Sep 5" },
+      ],
+    };
+
+    it("dates a charge that arrived after the day it happened", async () => {
+      const out = await render(LATE);
+      expect(out.html).toContain("Sep 5");
+      expect(out.text).toContain("Sep 5");
+    });
+
+    it("leaves a same-day charge undated", async () => {
+      const out = await render(LATE);
+      // Only the late one carries a date; dating every line would be noise.
+      expect(out.text.match(/Sep 5/g)).toHaveLength(1);
+    });
+
+    it("counts a late arrival in the new total like any other", async () => {
+      const out = await render(LATE);
+      expect(out.text).toContain("2 new, $72");
+    });
+  });
+
   describe("all spending this month", () => {
     const MTD = { ...DATA, monthToDate: { total: 20239, committed: 7000, discretionary: 12049, setAside: 1190 } };
 
@@ -160,7 +189,7 @@ describe("financial-health-daily", () => {
     const out = await render({ ...DATA, yesterday: [] });
     expect(out.html).toContain("0 new");
     expect(out.html).toContain("No transactions. Sync ran at Sep 15, 4:28am.");
-    expect(out.text).toContain("YESTERDAY — 0 new");
+    expect(out.text).toContain("NEW SINCE YOUR LAST REPORT — 0 new");
   });
 
   it("hides pace and the category card before day 5", async () => {

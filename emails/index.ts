@@ -323,6 +323,7 @@ export const templates = {
             uncategorized: z.boolean().optional(),
             fixUrl: z.string().url().optional(),
             owner: z.string().max(60).optional(),
+            on: z.string().max(20).optional(),
           }),
         )
         .max(100),

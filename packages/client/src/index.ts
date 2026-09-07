@@ -101,6 +101,8 @@ export interface TemplateData {
       fixUrl?: string;
       /** Whose charge it is. Omit or "Joint" for shared spending. */
       owner?: string;
+    /** Set when the charge is older than the day reported — it arrived late. */
+    on?: string;
     }>;
     categories: Array<{ name: string; spent: number; typical: number; needed?: boolean }>;
     upcoming: Array<{ label: string; total: number; setAside: number; due: string; accrual?: string }>;
