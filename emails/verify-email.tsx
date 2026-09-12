@@ -43,7 +43,7 @@ export function verifyEmailText({ appName, verifyUrl, name }: VerifyEmailProps) 
 VerifyEmail.PreviewProps = {
   appName: "Example App",
   verifyUrl: "https://example.com/verify?token=preview",
-  name: "Jeff",
+  name: "Alex",
 } satisfies VerifyEmailProps;
 
 export default VerifyEmail;

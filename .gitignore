@@ -9,3 +9,7 @@ dist/
 next-env.d.ts
 .vercel
 .DS_Store
+
+# Live APPS config exported for editing. It holds every app's API key.
+current-apps.json
+apps*.json

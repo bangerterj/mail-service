@@ -101,7 +101,7 @@ ActivityDigestEmail.PreviewProps = {
   period: "weekly",
   items: [
     { title: "3 new comments", detail: "On Q3 planning", url: "https://example.com/t/1" },
-    { title: "Jeff mentioned you", detail: "In the rollout thread" },
+    { title: "Alex mentioned you", detail: "In the rollout thread" },
   ],
   actionUrl: "https://example.com/dashboard",
   unsubscribeUrl: "https://example.com/settings/notifications",

@@ -12,7 +12,7 @@ Vercel project, backed by Amazon SES.
 
 Several independent web apps (currently 3, designed to grow to ~10) need two kinds of email:
 **transactional** auth mail (signup verification, password reset, welcome) and **notification**
-mail ("Jeff mentioned you", activity alerts). The distinction is load-bearing — see
+mail ("Alex mentioned you", activity alerts). The distinction is load-bearing — see
 section 7a. Each app has its **own domain** and must send from that domain. Today each app has its own free Resend account, which does not
 scale. Paid Resend is $20/mo; SES is $0.10 per 1,000 emails with no monthly floor, and
 verifies unlimited domains on one account for free. That price difference is the entire
@@ -144,7 +144,7 @@ Content-Type: application/json
 {
   "to": "user@example.com",              // string or string[], max 10
   "template": "password-reset",
-  "data": { "resetUrl": "https://...", "name": "Jeff" },
+  "data": { "resetUrl": "https://...", "name": "Alex" },
   "idempotencyKey": "optional-string"
 }
 ```
@@ -263,7 +263,7 @@ code rather than left to convention.
 **`transactional`** — the user's own action caused it, immediately (password reset, email
 verification, welcome). No unsubscribe; suppressing these would break account access.
 
-**`notification`** — someone *else's* action caused it ("Jeff mentioned you", activity
+**`notification`** — someone *else's* action caused it ("Alex mentioned you", activity
 digests). These require an opt-out.
 
 For any `notification` template the send route **must**:
