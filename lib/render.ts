@@ -1,5 +1,6 @@
 import { render } from "@react-email/components";
-import { isTokenTemplate, templates, type TemplateName } from "@/emails";
+import { isTokenTemplate, templates, type AnyTemplateDefinition, type TemplateName } from "@/emails";
+import type { ZodTypeAny } from "zod";
 import {
   render as renderTokens,
   renderSubject,
@@ -32,7 +33,10 @@ export async function renderTemplate(
   appName: string,
   unsubscribeUrl?: string,
 ): Promise<RenderedEmail> {
-  const template = templates[name];
+  // Widened to the declared union on purpose. A registry with no token
+  // templates in it infers a type the guard below narrows to `never`, and the
+  // token branch then fails to compile even though it is merely unused.
+  const template: AnyTemplateDefinition<ZodTypeAny> = templates[name];
 
   if (isTokenTemplate(template)) {
     const values: Record<string, string> = {};
