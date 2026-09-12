@@ -126,7 +126,7 @@ Content-Type: application/json
 {
   "to": "user@example.com",          // string or string[], max 10
   "template": "password-reset",
-  "data": { "resetUrl": "https://...", "name": "Jeff" },
+  "data": { "resetUrl": "https://...", "name": "Alex" },
   "idempotencyKey": "optional-string",
   "unsubscribeUrl": "https://..."    // required for notification templates only
 }
@@ -342,7 +342,7 @@ await mail.send({
 await mail.send({
   to: user.email,
   template: "mention",
-  data: { actorName: "Jeff", contextTitle: "Q3 planning", url },
+  data: { actorName: "Alex", contextTitle: "Q3 planning", url },
   unsubscribeUrl: `https://mealpicker.com/settings/notifications?t=${token}`,
 });
 ```
@@ -408,6 +408,11 @@ The load-bearing route assertions:
 ---
 
 ## Deployment
+
+Running on AWS instead of Vercel — App Runner, an IAM role instead of access keys,
+secrets in Secrets Manager: see [`docs/DEPLOY_AWS.md`](docs/DEPLOY_AWS.md).
+
+On Vercel:
 
 - Vercel project, root directory = repo root.
 - Set every env var above (Production + Preview).

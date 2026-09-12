@@ -136,8 +136,8 @@ const consentNote: React.CSSProperties = {
 
 HouseholdInviteEmail.PreviewProps = {
   appName: "Family Pantree",
-  inviterName: "Jeff",
-  householdName: "The Bangerters",
+  inviterName: "Alex",
+  householdName: "The Riveras",
   acceptUrl: "https://familypantree.com/invite/household/preview",
   shares: [
     "Pantry inventory",

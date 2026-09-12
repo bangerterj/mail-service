@@ -45,7 +45,7 @@ export function passwordResetText({ appName, resetUrl, name }: PasswordResetEmai
 PasswordResetEmail.PreviewProps = {
   appName: "Example App",
   resetUrl: "https://example.com/reset?token=preview",
-  name: "Jeff",
+  name: "Alex",
 } satisfies PasswordResetEmailProps;
 
 export default PasswordResetEmail;

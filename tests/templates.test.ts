@@ -35,8 +35,8 @@ describe("template registry", () => {
 
   it("requires the household invite consent panel to be non-empty", () => {
     const base = {
-      inviterName: "Jeff",
-      householdName: "The Bangerters",
+      inviterName: "Alex",
+      householdName: "The Riveras",
       acceptUrl: "https://a.test/i/1",
     };
     expect(templates["household-invite"].schema.safeParse(base).success).toBe(false);
@@ -61,7 +61,7 @@ describe("template registry", () => {
     expect(templates.mention.schema.safeParse({}).success).toBe(false);
     expect(
       templates.mention.schema.safeParse({
-        actorName: "Jeff",
+        actorName: "Alex",
         contextTitle: "Q3 planning",
         url: "https://a.test/t/1",
       }).success,
@@ -96,7 +96,7 @@ describe("renderTemplate", () => {
   it("renders both an HTML and a plaintext part containing the URL", async () => {
     const out = await renderTemplate(
       "password-reset",
-      { resetUrl: "https://alpha.test/reset?t=1", name: "Jeff" },
+      { resetUrl: "https://alpha.test/reset?t=1", name: "Alex" },
       "Alpha App",
     );
     expect(out.subject).toBe("Reset your password");
@@ -110,11 +110,11 @@ describe("renderTemplate", () => {
   it("renders the unsubscribe link into both parts of a notification email", async () => {
     const out = await renderTemplate(
       "mention",
-      { actorName: "Jeff", contextTitle: "Q3 planning", url: "https://a.test/t/1" },
+      { actorName: "Alex", contextTitle: "Q3 planning", url: "https://a.test/t/1" },
       "Alpha App",
       "https://a.test/settings/notifications",
     );
-    expect(out.subject).toBe("Jeff mentioned you in Q3 planning");
+    expect(out.subject).toBe("Alex mentioned you in Q3 planning");
     expect(out.html).toContain("https://a.test/settings/notifications");
     expect(out.html).toContain("Unsubscribe");
     expect(out.text).toContain("https://a.test/settings/notifications");
@@ -134,15 +134,15 @@ describe("renderTemplate", () => {
     const out = await renderTemplate(
       "household-invite",
       {
-        inviterName: "Jeff",
-        householdName: "The Bangerters",
+        inviterName: "Alex",
+        householdName: "The Riveras",
         acceptUrl: "https://a.test/i/1",
         shares: ["Pantry inventory", "Shopping cart", "Every shopping list"],
       },
       "Family Pantree",
       "https://a.test/opt-out",
     );
-    expect(out.subject).toBe("Jeff invited you to join The Bangerters");
+    expect(out.subject).toBe("Alex invited you to join The Riveras");
     for (const part of [out.html, out.text]) {
       expect(part).toContain("Pantry inventory");
       expect(part).toContain("Shopping cart");
@@ -155,14 +155,14 @@ describe("renderTemplate", () => {
     const out = await renderTemplate(
       "group-invite",
       {
-        inviterName: "Jeff",
+        inviterName: "Alex",
         groupName: "Sunday Dinner Crew",
         acceptUrl: "https://a.test/g/1",
       },
       "Family Pantree",
       "https://a.test/opt-out",
     );
-    expect(out.subject).toBe("Jeff invited you to Sunday Dinner Crew");
+    expect(out.subject).toBe("Alex invited you to Sunday Dinner Crew");
     // Must say recipes only, and must NOT claim to share pantry/cart/lists.
     expect(out.text.toLowerCase()).toContain("recipes only");
     expect(out.text).toMatch(/does not share your pantry/i);

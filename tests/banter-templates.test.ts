@@ -5,7 +5,7 @@ import { missingTokens } from "@/lib/token-render";
 import { renderTemplate } from "@/lib/render";
 
 const DATA = {
-  identifier: "jeff@example.com",
+  identifier: "alex@example.com",
   signInUrl: "https://banter.camp/api/auth/callback?token=abc&next=/feed",
 };
 
@@ -39,8 +39,8 @@ describe("banter-signin", () => {
 
   it("shows the requesting address and the link in both parts", async () => {
     const out = await renderTemplate("banter-signin", DATA, "Banter");
-    expect(out.html).toContain("jeff@example.com");
-    expect(out.text).toContain("jeff@example.com");
+    expect(out.html).toContain("alex@example.com");
+    expect(out.text).toContain("alex@example.com");
     expect(out.text).toContain(DATA.signInUrl);
     expect(out.text).not.toContain("<");
   });
@@ -66,7 +66,7 @@ describe("banter-signin", () => {
 
 describe("banter-recap", () => {
   const DATA = {
-    items: ["Jeff replied to your post", "Sam reacted to your comment"],
+    items: ["Alex replied to your post", "Sam reacted to your comment"],
     viewUrl: "https://banter.camp/notifications",
   };
   const UNSUB = "https://banter.camp/settings/notifications?token=abc";

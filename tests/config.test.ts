@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import "./setup-env";
-import { parseApps } from "@/lib/config";
+import { loadApps, parseApps } from "@/lib/config";
 
 const valid = {
   key_live_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: {
@@ -94,5 +94,23 @@ describe("parseApps", () => {
       key_live_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: valid.key_live_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
     };
     expect(() => parseApps(JSON.stringify(dupe))).toThrow(/duplicate appId/);
+  });
+});
+
+describe("loadApps", () => {
+  // next build imports every route to collect page data. Requiring APPS there
+  // forced every app's API key into the container image at build time.
+  it("allows an empty APPS while next build collects page data", () => {
+    expect(loadApps("", "phase-production-build").size).toBe(0);
+    expect(loadApps(undefined, "phase-production-build").size).toBe(0);
+  });
+
+  it("still fails loud when the server starts without it", () => {
+    expect(() => loadApps("", "phase-production-server")).toThrow(/APPS is required/);
+    expect(() => loadApps(undefined, undefined)).toThrow(/APPS is required/);
+  });
+
+  it("never lets the build phase excuse a malformed config", () => {
+    expect(() => loadApps("{not json", "phase-production-build")).toThrow(/not valid JSON/);
   });
 });
