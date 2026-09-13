@@ -1,0 +1,13 @@
+.git
+.next
+node_modules
+packages/client/node_modules
+packages/client/dist
+.vercel
+.env*
+coverage
+tests
+docs
+*.md
+Dockerfile
+.dockerignore
