@@ -3,9 +3,9 @@
  * (project 02a8f611…, `Email Templates.dc.html`).
  *
  * Deviations from the design, on purpose:
- *  - The chainring-O wordmark is live text (amber "O") rather than the 2x PNG
- *    the design calls for. No hosted PNG exists yet; text survives image
- *    blocking and dark mode. Swap in an <img alt="SaddleOut"> when one does.
+ *  - The wordmark is Arial Bold, not Barlow Condensed (web fonts rarely load
+ *    in mail). The chainring O is a hosted 96px PNG (public/brand/), shown at
+ *    20px; its alt text "O" keeps the word readable when images are blocked.
  *  - The "Requested from <browser> near <location>" line is left out: the
  *    saddleout app does not send that data, and a guessed value is worse than
  *    none in a security line.
@@ -52,7 +52,7 @@ export const SADDLEOUT_SIGN_IN_HTML = `<!DOCTYPE html>
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" class="wrap" style="width:560px; max-width:560px; background-color:#FBFAF5; border:1px solid #E3E1D5; border-radius:6px; overflow:hidden;">
 <tr><td bgcolor="#070B09" class="pad" style="background-color:#070B09; padding:18px 28px;">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-<td style="${F} font-size:20px; font-weight:bold; letter-spacing:2px; color:#F1F0E4; line-height:24px;">SADDLE<span style="color:#F2A72C;">O</span>UT</td>
+<td style="${F} font-size:20px; font-weight:bold; letter-spacing:2px; color:#F1F0E4; line-height:24px;">SADDLE<img src="https://mailer.bangerterbuilds.com/brand/saddleout-o.png" width="20" height="20" alt="O" style="display:inline-block; width:20px; height:20px; border:0; vertical-align:-3px; margin:0 1px; color:#F2A72C;">UT</td>
 <td align="right" style="${MONO} font-size:10px; letter-spacing:2px; color:#93A388; line-height:24px;">STAY IN. HEAD OUT.</td>
 </tr></table>
 </td></tr>
