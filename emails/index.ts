@@ -39,6 +39,12 @@ import {
   BANTER_SIGNIN_TEXT,
   BANTER_SIGNIN_TOKENS,
 } from "./banter/signin";
+import {
+  SADDLEOUT_SIGN_IN_HTML,
+  SADDLEOUT_SIGN_IN_SUBJECT,
+  SADDLEOUT_SIGN_IN_TEXT,
+  SADDLEOUT_SIGN_IN_TOKENS,
+} from "./saddleout/magic-sign-in";
 import { BanterRecapEmail, banterRecapText } from "./banter/recap";
 import {
   FinancialHealthDailyEmail,
@@ -273,6 +279,17 @@ export const templates = {
       postalAddress: z.string().min(1).max(200),
       preferencesUrl: z.string().url(),
       reportUrl: z.string().min(1).max(300),
+    }),
+  }),
+  "saddleout-magic-sign-in": defineTokens({
+    category: "transactional",
+    tokens: SADDLEOUT_SIGN_IN_TOKENS,
+    subjectTemplate: SADDLEOUT_SIGN_IN_SUBJECT,
+    html: SADDLEOUT_SIGN_IN_HTML,
+    textTemplate: SADDLEOUT_SIGN_IN_TEXT,
+    schema: z.object({
+      signInUrl: z.string().url(),
+      expiresIn: z.string().min(1).max(50).default("15 minutes"),
     }),
   }),
   "banter-signin": defineTokens({
