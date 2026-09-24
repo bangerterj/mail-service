@@ -38,6 +38,9 @@ export const SADDLEOUT_SIGN_IN_HTML = `<!DOCTYPE html>
 <xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
 <![endif]-->
 <style>
+@media only screen and (max-width: 480px) {
+.tag { display: none !important; }
+}
 @media only screen and (max-width: 600px) {
 .wrap { width: 100% !important; }
 .pad { padding-left: 22px !important; padding-right: 22px !important; }
@@ -52,8 +55,8 @@ export const SADDLEOUT_SIGN_IN_HTML = `<!DOCTYPE html>
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" class="wrap" style="width:560px; max-width:560px; background-color:#FBFAF5; border:1px solid #E3E1D5; border-radius:6px; overflow:hidden;">
 <tr><td bgcolor="#070B09" class="pad" style="background-color:#070B09; padding:18px 28px;">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-<td style="${F} font-size:20px; font-weight:bold; letter-spacing:2px; color:#F1F0E4; line-height:24px;">SADDLE<img src="https://mailer.bangerterbuilds.com/brand/saddleout-o.png" width="20" height="20" alt="O" style="display:inline-block; width:20px; height:20px; border:0; vertical-align:-3px; margin:0 1px; color:#F2A72C;">UT</td>
-<td align="right" style="${MONO} font-size:10px; letter-spacing:2px; color:#93A388; line-height:24px;">STAY IN. HEAD OUT.</td>
+<td style="${F} font-size:20px; font-weight:bold; letter-spacing:2px; color:#F1F0E4; line-height:24px; white-space:nowrap;">SADDLE<img src="https://mailer.bangerterbuilds.com/brand/saddleout-o.png" width="20" height="20" alt="O" style="display:inline-block; width:20px; height:20px; border:0; vertical-align:-3px; margin:0 1px; color:#F2A72C;">UT</td>
+<td align="right" class="tag" style="${MONO} font-size:9px; letter-spacing:1px; color:#93A388; line-height:24px; white-space:nowrap; padding-left:12px;">STAY IN. HEAD OUT.</td>
 </tr></table>
 </td></tr>
 <tr><td class="pad" style="padding:32px 28px 0 28px; ${MONO} font-size:11px; letter-spacing:2px; color:#8A5A0B; line-height:16px;">SIGN IN</td></tr>
