@@ -49,6 +49,7 @@ export interface TemplateData {
     reportUrl: string;
   };
   "saddleout-magic-sign-in": { signInUrl: string; expiresIn?: string };
+  "saddleout-beta-access": { name: string; devices: string; pageUrl: string };
   "saddleout-new-signup": { eyebrow: string; headline: string; details: string; totals: string; adminUrl: string };
   "familypantree-magic-sign-in": {
     signInUrl: string;

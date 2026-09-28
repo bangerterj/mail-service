@@ -51,6 +51,12 @@ import {
   SADDLEOUT_NEW_SIGNUP_TEXT,
   SADDLEOUT_NEW_SIGNUP_TOKENS,
 } from "./saddleout/new-signup";
+import {
+  SADDLEOUT_BETA_ACCESS_HTML,
+  SADDLEOUT_BETA_ACCESS_SUBJECT,
+  SADDLEOUT_BETA_ACCESS_TEXT,
+  SADDLEOUT_BETA_ACCESS_TOKENS,
+} from "./saddleout/beta-access";
 import { BanterRecapEmail, banterRecapText } from "./banter/recap";
 import {
   FinancialHealthDailyEmail,
@@ -313,6 +319,19 @@ export const templates = {
       details: z.string().min(1).max(3000),
       totals: z.string().min(1).max(200),
       adminUrl: z.string().url(),
+    }),
+  }),
+  // To a rider let in from the beta queue: they asked for access and for this email.
+  "saddleout-beta-access": defineTokens({
+    category: "transactional",
+    tokens: SADDLEOUT_BETA_ACCESS_TOKENS,
+    subjectTemplate: SADDLEOUT_BETA_ACCESS_SUBJECT,
+    html: SADDLEOUT_BETA_ACCESS_HTML,
+    textTemplate: SADDLEOUT_BETA_ACCESS_TEXT,
+    schema: z.object({
+      name: z.string().min(1).max(60),
+      devices: z.string().min(1).max(120),
+      pageUrl: z.string().url(),
     }),
   }),
   "banter-signin": defineTokens({

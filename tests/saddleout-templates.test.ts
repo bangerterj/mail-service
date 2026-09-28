@@ -8,6 +8,11 @@ import {
   SADDLEOUT_NEW_SIGNUP_TEXT,
   SADDLEOUT_NEW_SIGNUP_TOKENS,
 } from "@/emails/saddleout/new-signup";
+import {
+  SADDLEOUT_BETA_ACCESS_HTML,
+  SADDLEOUT_BETA_ACCESS_TEXT,
+  SADDLEOUT_BETA_ACCESS_TOKENS,
+} from "@/emails/saddleout/beta-access";
 
 const DATA = {
   eyebrow: "JOINED THE QUEUE",
@@ -39,5 +44,21 @@ describe("saddleout-new-signup", () => {
   it("requires the admin link", () => {
     const { adminUrl: _, ...rest } = DATA;
     expect(templates["saddleout-new-signup"].schema.safeParse(rest).success).toBe(false);
+  });
+});
+
+describe("saddleout-beta-access", () => {
+  it("is transactional, uses every token, and escapes the username", async () => {
+    expect(templates["saddleout-beta-access"].category).toBe("transactional");
+    expect(missingTokens(SADDLEOUT_BETA_ACCESS_HTML, SADDLEOUT_BETA_ACCESS_TOKENS)).toEqual([]);
+    expect(missingTokens(SADDLEOUT_BETA_ACCESS_TEXT, SADDLEOUT_BETA_ACCESS_TOKENS)).toEqual([]);
+    const out = await renderTemplate(
+      "saddleout-beta-access",
+      { name: "<i>trailrat</i>", devices: "for your iPhone and Windows PC", pageUrl: "https://saddleout.com/#join" },
+      "SaddleOut",
+    );
+    expect(out.subject).toBe("You're in the SaddleOut beta");
+    expect(out.html).toContain("You're in, &lt;i&gt;trailrat&lt;/i&gt;.");
+    expect(out.html).toContain('href="https://saddleout.com/#join"');
   });
 });
