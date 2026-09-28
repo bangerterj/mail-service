@@ -45,6 +45,12 @@ import {
   SADDLEOUT_SIGN_IN_TEXT,
   SADDLEOUT_SIGN_IN_TOKENS,
 } from "./saddleout/magic-sign-in";
+import {
+  SADDLEOUT_NEW_SIGNUP_HTML,
+  SADDLEOUT_NEW_SIGNUP_SUBJECT,
+  SADDLEOUT_NEW_SIGNUP_TEXT,
+  SADDLEOUT_NEW_SIGNUP_TOKENS,
+} from "./saddleout/new-signup";
 import { BanterRecapEmail, banterRecapText } from "./banter/recap";
 import {
   FinancialHealthDailyEmail,
@@ -290,6 +296,23 @@ export const templates = {
     schema: z.object({
       signInUrl: z.string().url(),
       expiresIn: z.string().min(1).max(50).default("15 minutes"),
+    }),
+  }),
+  // To SaddleOut's own admins when a rider signs up. A rider's action caused it,
+  // so it is a notification and the footer link is the admin's opt-out.
+  "saddleout-new-signup": defineTokens({
+    category: "notification",
+    tokens: SADDLEOUT_NEW_SIGNUP_TOKENS,
+    subjectTemplate: SADDLEOUT_NEW_SIGNUP_SUBJECT,
+    html: SADDLEOUT_NEW_SIGNUP_HTML,
+    textTemplate: SADDLEOUT_NEW_SIGNUP_TEXT,
+    unsubscribeToken: "preferencesUrl",
+    schema: z.object({
+      eyebrow: z.string().min(1).max(40),
+      headline: z.string().min(1).max(120),
+      details: z.string().min(1).max(3000),
+      totals: z.string().min(1).max(200),
+      adminUrl: z.string().url(),
     }),
   }),
   "banter-signin": defineTokens({

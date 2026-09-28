@@ -19,6 +19,7 @@ describe("template registry", () => {
         "familypantree-password-reset",
         "familypantree-magic-sign-in",
         "saddleout-magic-sign-in",
+        "saddleout-new-signup",
         "familypantree-household-invite",
         "familypantree-group-invite",
         "banter-signin",
