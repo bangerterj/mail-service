@@ -57,6 +57,15 @@ import {
   SADDLEOUT_BETA_ACCESS_TEXT,
   SADDLEOUT_BETA_ACCESS_TOKENS,
 } from "./saddleout/beta-access";
+import {
+  SADDLEOUT_ROUTE_READY_HTML,
+  SADDLEOUT_ROUTE_READY_TEXT,
+  SADDLEOUT_ROUTE_READY_TOKENS,
+  SADDLEOUT_ROUTE_SUBJECT,
+  SADDLEOUT_ROUTE_UPDATE_HTML,
+  SADDLEOUT_ROUTE_UPDATE_TEXT,
+  SADDLEOUT_ROUTE_UPDATE_TOKENS,
+} from "./saddleout/route-update";
 import { BanterRecapEmail, banterRecapText } from "./banter/recap";
 import {
   FinancialHealthDailyEmail,
@@ -332,6 +341,36 @@ export const templates = {
       name: z.string().min(1).max(60),
       devices: z.string().min(1).max(120),
       pageUrl: z.string().url(),
+    }),
+  }),
+  // Create a route: to the rider who uploaded it (their own action), at each build step.
+  "saddleout-route-update": defineTokens({
+    category: "transactional",
+    tokens: SADDLEOUT_ROUTE_UPDATE_TOKENS,
+    subjectTemplate: SADDLEOUT_ROUTE_SUBJECT,
+    html: SADDLEOUT_ROUTE_UPDATE_HTML,
+    textTemplate: SADDLEOUT_ROUTE_UPDATE_TEXT,
+    schema: z.object({
+      eyebrow: z.string().min(1).max(60),
+      headline: z.string().min(1).max(140),
+      body: z.string().min(1).max(800),
+      buttonLabel: z.string().min(1).max(40),
+      buttonUrl: z.string().url(),
+    }),
+  }),
+  "saddleout-route-ready": defineTokens({
+    category: "transactional",
+    tokens: SADDLEOUT_ROUTE_READY_TOKENS,
+    subjectTemplate: SADDLEOUT_ROUTE_SUBJECT,
+    html: SADDLEOUT_ROUTE_READY_HTML,
+    textTemplate: SADDLEOUT_ROUTE_READY_TEXT,
+    schema: z.object({
+      eyebrow: z.string().min(1).max(60),
+      headline: z.string().min(1).max(140),
+      body: z.string().min(1).max(800),
+      buttonLabel: z.string().min(1).max(40),
+      buttonUrl: z.string().url(),
+      imageUrl: z.string().url(),
     }),
   }),
   "banter-signin": defineTokens({

@@ -21,6 +21,8 @@ describe("template registry", () => {
         "saddleout-magic-sign-in",
         "saddleout-new-signup",
         "saddleout-beta-access",
+        "saddleout-route-update",
+        "saddleout-route-ready",
         "familypantree-household-invite",
         "familypantree-group-invite",
         "banter-signin",

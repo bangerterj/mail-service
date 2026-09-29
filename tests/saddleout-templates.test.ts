@@ -13,6 +13,14 @@ import {
   SADDLEOUT_BETA_ACCESS_TEXT,
   SADDLEOUT_BETA_ACCESS_TOKENS,
 } from "@/emails/saddleout/beta-access";
+import {
+  SADDLEOUT_ROUTE_READY_HTML,
+  SADDLEOUT_ROUTE_READY_TEXT,
+  SADDLEOUT_ROUTE_READY_TOKENS,
+  SADDLEOUT_ROUTE_UPDATE_HTML,
+  SADDLEOUT_ROUTE_UPDATE_TEXT,
+  SADDLEOUT_ROUTE_UPDATE_TOKENS,
+} from "@/emails/saddleout/route-update";
 
 const DATA = {
   eyebrow: "JOINED THE QUEUE",
@@ -60,5 +68,31 @@ describe("saddleout-beta-access", () => {
     expect(out.subject).toBe("You're in the SaddleOut beta");
     expect(out.html).toContain("You're in, &lt;i&gt;trailrat&lt;/i&gt;.");
     expect(out.html).toContain('href="https://saddleout.com/#join"');
+  });
+});
+
+describe("saddleout-route-update / -ready", () => {
+  const base = {
+    eyebrow: "VERSION 1 READY",
+    headline: "Tunnel Creek <b>is</b> ready to ride",
+    body: "Version 1 is the plain build.",
+    buttonLabel: "See your route",
+    buttonUrl: "https://saddleout.com/create/abc",
+  };
+  it("uses every token, escapes the route name, and only the ready one shows a picture", async () => {
+    for (const [html, text, tokens] of [
+      [SADDLEOUT_ROUTE_UPDATE_HTML, SADDLEOUT_ROUTE_UPDATE_TEXT, SADDLEOUT_ROUTE_UPDATE_TOKENS],
+      [SADDLEOUT_ROUTE_READY_HTML, SADDLEOUT_ROUTE_READY_TEXT, SADDLEOUT_ROUTE_READY_TOKENS],
+    ] as const) {
+      expect(missingTokens(html, tokens)).toEqual([]);
+      expect(missingTokens(text, tokens)).toEqual([]);
+    }
+    expect(templates["saddleout-route-update"].category).toBe("transactional");
+    const upd = await renderTemplate("saddleout-route-update", base, "SaddleOut");
+    expect(upd.subject).toBe("Tunnel Creek <b>is</b> ready to ride");
+    expect(upd.html).toContain("Tunnel Creek &lt;b&gt;is&lt;/b&gt; ready to ride");
+    expect(upd.html).not.toContain("<img src=\"https://saddleout.com");
+    const ready = await renderTemplate("saddleout-route-ready", { ...base, imageUrl: "https://saddleout.com/api/map-jobs/abc/picture?n=p.jpg&t=x" }, "SaddleOut");
+    expect(ready.html).toContain('src="https://saddleout.com/api/map-jobs/abc/picture?n=p.jpg&amp;t=x"');
   });
 });
