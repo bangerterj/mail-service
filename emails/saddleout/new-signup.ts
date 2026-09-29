@@ -71,7 +71,7 @@ export const SADDLEOUT_NEW_SIGNUP_HTML = `<!DOCTYPE html>
 </tr></table>
 </td></tr>
 <tr><td class="pad" style="padding:30px 28px 0 28px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td height="1" bgcolor="#E3E1D5" style="background-color:#E3E1D5; font-size:0; line-height:0;">&nbsp;</td></tr></table></td></tr>
-<tr><td class="pad" style="padding:16px 28px 28px 28px; ${F} font-size:12px; color:#7A8476; line-height:18px;">You get these because you're a SaddleOut admin with sign-up alerts on. <a href="{preferencesUrl}" style="color:#7A8476; text-decoration:underline;">Stop these emails</a></td></tr>
+<tr><td class="pad" style="padding:16px 28px 28px 28px; ${F} font-size:12px; color:#7A8476; line-height:18px;">You get these because you're a SaddleOut admin with email alerts on (sign-ups and tester feedback). <a href="{preferencesUrl}" style="color:#7A8476; text-decoration:underline;">Stop these emails</a></td></tr>
 </table>
 </td></tr>
 </table>
@@ -87,5 +87,5 @@ export const SADDLEOUT_NEW_SIGNUP_TEXT = `{eyebrow}
 
 Open in admin: {adminUrl}
 
-You get these because you're a SaddleOut admin with sign-up alerts on.
+You get these because you're a SaddleOut admin with email alerts on (sign-ups and tester feedback).
 Stop these emails: {preferencesUrl}`;
