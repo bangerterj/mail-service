@@ -23,6 +23,7 @@ describe("template registry", () => {
         "banter-signin",
         "banter-recap",
         "financial-health-daily",
+        "financial-health-monthly",
       ]),
     );
   });
