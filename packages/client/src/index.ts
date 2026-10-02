@@ -161,6 +161,37 @@ export interface TemplateData {
     syncedAt: string;
     appUrl: string;
   };
+  /**
+   * Money Mountain's monthly recap. A notification: unsubscribeUrl is required.
+   * The app composes `headline`, `summary` and `lines`; the template places
+   * them and computes nothing about the money.
+   */
+  "financial-health-monthly": {
+    /** "2026-09" */
+    month: string;
+    /** "September 2026" */
+    monthLabel: string;
+    /** "$2,909 under budget" */
+    headline: string;
+    summary: string;
+    tone: "good" | "warn" | "neutral";
+    lines: string[];
+    spend: number;
+    budget: number | null;
+    /** Negative when the month came in under. */
+    overBudget: number | null;
+    saved: number | null;
+    savingsRatePct: number | null;
+    afterTaxIncome: number | null;
+    netWorth: number | null;
+    netWorthChange: number | null;
+    movers: Array<{ name: string; spent: number; typical: number; delta: number }>;
+    carveOuts: Array<{ label: string; amount: number; count: number }>;
+    business: { revenue: number; expenses: number; net: number } | null;
+    /** `date` is "2026-09-12". */
+    biggest: Array<{ name: string; amount: number; date: string }>;
+    viewUrl: string;
+  };
   "familypantree-group-invite": {
     inviterFirstName: string;
     groupName: string;
@@ -197,6 +228,7 @@ export const NOTIFICATION_TEMPLATES = [
   "familypantree-group-invite",
   "banter-recap",
   "financial-health-daily",
+  "financial-health-monthly",
 ] as const;
 
 export type NotificationTemplate = (typeof NOTIFICATION_TEMPLATES)[number];

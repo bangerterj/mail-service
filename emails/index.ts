@@ -45,6 +45,11 @@ import {
   financialHealthDailySubject,
   financialHealthDailyText,
 } from "./financial-health/daily";
+import {
+  FinancialHealthMonthlyEmail,
+  financialHealthMonthlySubject,
+  financialHealthMonthlyText,
+} from "./financial-health/monthly";
 
 /**
  * `transactional` — the recipient's own action caused it. No unsubscribe;
@@ -439,6 +444,72 @@ export const templates = {
     subject: (d, appName) => financialHealthDailySubject({ ...d, appName }),
     component: (props) => React.createElement(FinancialHealthDailyEmail, props),
     text: financialHealthDailyText,
+  }),
+  "financial-health-monthly": define({
+    // Money Mountain's monthly recap — how a finished month went, sent a few
+    // days into the next one. A scheduled digest of the household's own
+    // activity, so it carries an opt-out.
+    //
+    // The app composes the sentences and does the arithmetic; this schema is
+    // the contract between them. Nothing here is computed from anything else:
+    // if the email derived its own figures they would drift from the page the
+    // recap links to.
+    category: "notification",
+    schema: z.object({
+      month: z.string().regex(/^\d{4}-\d{2}$/),
+      monthLabel: z.string().min(1).max(40),
+      headline: z.string().min(1).max(120),
+      summary: z.string().min(1).max(200),
+      tone: z.enum(["good", "warn", "neutral"]),
+      lines: z.array(z.string().min(1).max(300)).max(20),
+      spend: z.number().finite(),
+      budget: z.number().finite().nullable(),
+      overBudget: z.number().finite().nullable(),
+      saved: z.number().finite().nullable(),
+      savingsRatePct: z.number().finite().nullable(),
+      afterTaxIncome: z.number().finite().nullable(),
+      netWorth: z.number().finite().nullable(),
+      netWorthChange: z.number().finite().nullable(),
+      movers: z
+        .array(
+          z.object({
+            name: z.string().min(1).max(80),
+            spent: z.number().finite(),
+            typical: z.number().finite(),
+            delta: z.number().finite(),
+          }),
+        )
+        .max(10),
+      carveOuts: z
+        .array(
+          z.object({
+            label: z.string().min(1).max(80),
+            amount: z.number().finite(),
+            count: z.number().int().min(0).max(10000),
+          }),
+        )
+        .max(10),
+      business: z
+        .object({
+          revenue: z.number().finite(),
+          expenses: z.number().finite(),
+          net: z.number().finite(),
+        })
+        .nullable(),
+      biggest: z
+        .array(
+          z.object({
+            name: z.string().min(1).max(120),
+            amount: z.number().finite(),
+            date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+          }),
+        )
+        .max(10),
+      viewUrl: z.string().url(),
+    }),
+    subject: (d, appName) => financialHealthMonthlySubject({ ...d, appName }),
+    component: (props) => React.createElement(FinancialHealthMonthlyEmail, props),
+    text: financialHealthMonthlyText,
   }),
   "activity-digest": define({
     category: "notification",
