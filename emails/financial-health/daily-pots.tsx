@@ -38,7 +38,8 @@ export interface PotsJar {
 
 export interface PotsStrip {
   verdict: "on track" | "behind" | "in balance" | "out of balance" | "no data";
-  cells: Array<{ label: string; state: CellState; delta: number | null }>;
+  /** `value` is the month's actual amount (saved); when present it labels the cell and `delta` only colours it. */
+  cells: Array<{ label: string; state: CellState; delta: number | null; value?: number | null }>;
 }
 
 export interface PotsBlock {
@@ -72,7 +73,7 @@ export interface PotsBlock {
     year: number;
     month: number;
     /** `span` names the months scored — "Jan–Aug" — since unscored months are left out of both sides. */
-    savings: (PotsStrip & { savedToDate: number; targetToDate: number; target: number; span?: string | null; gaps?: string[] }) | null;
+    savings: (PotsStrip & { savedToDate: number; targetToDate: number; earnedToDate?: number; target: number; span?: string | null; gaps?: string[] }) | null;
     spending: PotsStrip & { averageUnder: number; sinceLabel: string };
   };
   charges: Array<{
@@ -130,6 +131,14 @@ export const money = (n: number) => `${n < 0 ? "−" : ""}$${Math.round(Math.abs
 const plain = (n: number) => `$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
 /** "+$102", "−$877" — for a figure whose direction is the point. */
 export const signed = (n: number) => `${n >= 0 ? "+" : "−"}${plain(n)}`;
+
+/** "8.4k", "21k", "545" — an amount rather than a difference, for a strip cell. */
+export function short(n: number): string {
+  const a = Math.abs(n);
+  // One decimal up to $100k, so the cells add up to the headline on a calculator.
+  const v = a >= 100_000 ? `${Math.round(a / 1000)}k` : a >= 1_000 ? `${(a / 1000).toFixed(1)}k` : `${Math.round(a)}`;
+  return n < 0 ? `−${v}` : v;
+}
 
 /** "+412", "−186", "+20.6k" — narrow enough for one of twelve cells. */
 export function compact(n: number): string {
@@ -362,7 +371,11 @@ function Strip({ strip }: { strip: PotsStrip }) {
             {strip.cells.map((c, i) => (
               <td key={i} align="center" style={{ ...NUM, fontSize: "9.5px", color: INK3, paddingTop: "4px", verticalAlign: "top" }}>
                 {c.label}
-                {c.delta != null ? (
+                {c.value != null ? (
+                  <div style={{ fontFamily: DISPLAY, fontSize: "10px", fontWeight: 700, whiteSpace: "nowrap", color: INK, letterSpacing: "-0.03em" }}>
+                    {short(c.value)}
+                  </div>
+                ) : c.delta != null ? (
                   <div style={{ fontFamily: DISPLAY, fontSize: "10px", fontWeight: 700, whiteSpace: "nowrap", color: c.delta >= 0 ? GREEN : RED, letterSpacing: "-0.03em" }}>
                     {compact(c.delta)}
                   </div>
@@ -561,8 +574,10 @@ export function FinancialHealthDailyPotsEmail(p: FinancialHealthDailyProps & { p
                               <tr>
                                 <td>
                                   <div style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: "14px" }}>Savings</div>
-                                  <div style={{ ...small, marginTop: "1px" }}>
-                                    {plain(pc.savings.savedToDate)} saved {pc.savings.span ?? "this year"} · plan says {plain(pc.savings.targetToDate)} for those months
+                                  <div style={{ ...NUM, fontSize: "12.5px", color: INK2, marginTop: "1px" }}>
+                                    <b style={{ color: INK }}>{plain(pc.savings.savedToDate)}</b> saved
+                                    {pc.savings.earnedToDate ? ` of ${plain(pc.savings.earnedToDate)} that came in · ${Math.round((pc.savings.savedToDate / pc.savings.earnedToDate) * 100)}%` : ""}
+                                    {pc.savings.span ? <span style={{ color: INK3 }}>{` · ${pc.savings.span}`}</span> : null}
                                   </div>
                                 </td>
                                 <td align="right" style={{ verticalAlign: "top" }}>
@@ -573,7 +588,8 @@ export function FinancialHealthDailyPotsEmail(p: FinancialHealthDailyProps & { p
                           </table>
                           <Strip strip={pc.savings} />
                           <div style={{ ...NUM, fontSize: "12.5px", color: INK2, lineHeight: 1.5, marginTop: "9px" }}>
-                            Over or under {plain(pc.savings.target)} a month, the pace that keeps the retirement date. Only what has landed is counted.
+                            The plan needs {plain(pc.savings.target)} a month to keep the retirement date — {plain(pc.savings.targetToDate)} for these months, so{" "}
+                            {pc.savings.savedToDate >= pc.savings.targetToDate ? `${plain(pc.savings.savedToDate - pc.savings.targetToDate)} ahead` : `${plain(pc.savings.targetToDate - pc.savings.savedToDate)} short`}. Green months met it.
                             {pc.savings.gaps?.length ? ` Not in yet: ${pc.savings.gaps.join(" ")}` : ""}
                           </div>
                         </div>
@@ -827,7 +843,7 @@ function stripText(strip: PotsStrip): string {
   return strip.cells
     // Months before the plan are context in the strip, noise in a sentence.
     .filter((c) => c.state !== "future" && c.state !== "pre")
-    .map((c) => `${c.label} ${c.delta != null ? compact(c.delta) : stateWord[c.state]}`.trim())
+    .map((c) => `${c.label} ${c.value != null ? short(c.value) : c.delta != null ? compact(c.delta) : stateWord[c.state]}`.trim())
     .join(" · ");
 }
 
@@ -850,7 +866,13 @@ export function financialHealthDailyPotsText(p: FinancialHealthDailyProps & { po
   const pc = pots.planCheck;
   L.push(`PLAN CHECK — ${pc.year}, month ${pc.month} of 12`);
   if (pc.savings) {
-    L.push(`Savings: ${pc.savings.verdict}. ${plain(pc.savings.savedToDate)} saved ${pc.savings.span ?? "this year"}; plan says ${plain(pc.savings.targetToDate)} for those months (${plain(pc.savings.target)} a month).`);
+    {
+      const sv = pc.savings;
+      const of = sv.earnedToDate ? ` of ${plain(sv.earnedToDate)} that came in (${Math.round((sv.savedToDate / sv.earnedToDate) * 100)}%)` : "";
+      const gap = sv.savedToDate >= sv.targetToDate ? `${plain(sv.savedToDate - sv.targetToDate)} ahead` : `${plain(sv.targetToDate - sv.savedToDate)} short`;
+      L.push(`Savings: ${sv.verdict}. ${plain(sv.savedToDate)} saved${of}${sv.span ? `, ${sv.span}` : ""}.`);
+      L.push(`The plan needs ${plain(sv.target)} a month — ${plain(sv.targetToDate)} for these months, so ${gap}.`);
+    }
     L.push(`  ${stripText(pc.savings)}`);
     if (pc.savings.gaps?.length) L.push(`  Not in yet: ${pc.savings.gaps.join(" ")}`);
   }

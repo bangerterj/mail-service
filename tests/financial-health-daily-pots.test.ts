@@ -3,7 +3,7 @@ import "./setup-env";
 import { templates } from "@/emails";
 import { renderTemplate } from "@/lib/render";
 import { FinancialHealthDailyEmail } from "@/emails/financial-health/daily";
-import { compact, jarBands, type PotsBlock } from "@/emails/financial-health/daily-pots";
+import { compact, jarBands, short, type PotsBlock } from "@/emails/financial-health/daily-pots";
 
 const { appName: _a, unsubscribeUrl: _u, ...BASE } = FinancialHealthDailyEmail.PreviewProps;
 const UNSUB = "https://money.mountain/mail/off";
@@ -58,6 +58,7 @@ const POTS: PotsBlock = {
       targetToDate: 34_866,
       target: 3_740,
       span: "Jan–Sep",
+      earnedToDate: 120_000,
       gaps: ["Employer match is counted through Jun 30, the latest plan statement."],
       cells: [
         { label: "J", state: "miss", delta: -530 },
@@ -164,8 +165,9 @@ describe("financial-health-daily — three pots", () => {
     expect(out.html).toContain("On track");
     expect(out.html).toContain("In balance");
     // Names the months it scored, rather than claiming "by now".
-    expect(out.text).toContain("Savings: on track. $35,790 saved Jan–Sep; plan says $34,866 for those months ($3,740 a month).");
-    expect(out.html).toContain("saved Jan–Sep · plan says $34,866 for those months");
+    // What was saved out of what came in, then the plan as a second line.
+    expect(out.text).toContain("Savings: on track. $35,790 saved of $120,000 that came in (30%), Jan–Sep.");
+    expect(out.text).toContain("The plan needs $3,740 a month — $34,866 for these months, so $924 ahead.");
     // What is missing is named, not estimated.
     expect(out.text).toContain("Not in yet: Employer match is counted through Jun 30, the latest plan statement.");
     expect(out.text).toContain("Averaging +$102 a month.");
@@ -253,5 +255,17 @@ describe("compact", () => {
     expect(compact(-186)).toBe("−186");
     expect(compact(2_408)).toBe("+2.4k");
     expect(compact(20_552)).toBe("+21k");
+  });
+});
+
+describe("short", () => {
+  it("labels a month's saving closely enough that the cells add up to the total", () => {
+    // Jan–Aug 2026: the eight labels sum to $76.4k, the headline figure.
+    const months = [8_385, 30_520, 8_511, 229, 9_423, 11_808, 3_877, 3_653];
+    const labelled = months.map(short).reduce((s, l) => s + (l.endsWith("k") ? parseFloat(l) * 1000 : parseFloat(l)), 0);
+    expect(Math.abs(labelled - months.reduce((s, m) => s + m, 0))).toBeLessThan(200);
+    expect(short(30_520)).toBe("30.5k");
+    expect(short(229)).toBe("229");
+    expect(short(-1_200)).toBe("\u22121.2k");
   });
 });
