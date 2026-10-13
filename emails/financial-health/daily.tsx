@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FinancialHealthDailyPotsEmail, financialHealthDailyPotsText, type PotsBlock } from "./daily-pots";
 
 /**
  * Money Mountain's daily budget report — the 4:30am email, read on a phone.
@@ -170,6 +171,11 @@ export interface FinancialHealthDailyProps {
   person?: { name: string; share: number };
   /** The household total behind a personal hero, for one line of context. */
   household?: { budget: number; spent: number };
+  /**
+   * Three pots, a plan check and the fun fund. When present the email is the
+   * three-pot layout (./daily-pots.tsx); without it, this one.
+   */
+  pots?: PotsBlock;
   /** One observation, chosen by date so both readers see the same line. */
   /**
    * Everything that left the account this month, budget or no budget.
@@ -345,6 +351,7 @@ function Mark() {
 }
 
 export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
+  if (p.pots) return FinancialHealthDailyPotsEmail({ ...p, pots: p.pots });
   const d = derive(p);
   const heroColor = d.overBudget || (d.paceReadable && d.verdict === "over") ? RED : INK;
   const barColor = d.overBudget || (d.paceReadable && d.verdict === "over") ? RED : FOREST;
@@ -956,6 +963,7 @@ export function FinancialHealthDailyEmail(p: FinancialHealthDailyProps) {
 }
 
 export function financialHealthDailyText(p: FinancialHealthDailyProps): string {
+  if (p.pots) return financialHealthDailyPotsText({ ...p, pots: p.pots });
   const d = derive(p);
   const dayWord = (n: number) => (n === 1 ? "day" : "days");
   const L: string[] = [`${p.appName.toUpperCase()} — ${p.reportDate}, day ${p.dayOfMonth} of ${p.daysInMonth}`, ""];
