@@ -72,7 +72,7 @@ export interface PotsBlock {
     year: number;
     month: number;
     /** `span` names the months scored — "Jan–Aug" — since unscored months are left out of both sides. */
-    savings: (PotsStrip & { savedToDate: number; targetToDate: number; target: number; span?: string | null }) | null;
+    savings: (PotsStrip & { savedToDate: number; targetToDate: number; target: number; span?: string | null; gaps?: string[] }) | null;
     spending: PotsStrip & { averageUnder: number; sinceLabel: string };
   };
   charges: Array<{
@@ -573,7 +573,8 @@ export function FinancialHealthDailyPotsEmail(p: FinancialHealthDailyProps & { p
                           </table>
                           <Strip strip={pc.savings} />
                           <div style={{ ...NUM, fontSize: "12.5px", color: INK2, lineHeight: 1.5, marginTop: "9px" }}>
-                            Over or under {plain(pc.savings.target)} a month, the pace that keeps the retirement date. A month with no pay figure yet is shown, not scored.
+                            Over or under {plain(pc.savings.target)} a month, the pace that keeps the retirement date. Only what has landed is counted.
+                            {pc.savings.gaps?.length ? ` Not in yet: ${pc.savings.gaps.join(" ")}` : ""}
                           </div>
                         </div>
                       ) : null}
@@ -851,6 +852,7 @@ export function financialHealthDailyPotsText(p: FinancialHealthDailyProps & { po
   if (pc.savings) {
     L.push(`Savings: ${pc.savings.verdict}. ${plain(pc.savings.savedToDate)} saved ${pc.savings.span ?? "this year"}; plan says ${plain(pc.savings.targetToDate)} for those months (${plain(pc.savings.target)} a month).`);
     L.push(`  ${stripText(pc.savings)}`);
+    if (pc.savings.gaps?.length) L.push(`  Not in yet: ${pc.savings.gaps.join(" ")}`);
   }
   L.push(`Spending: ${pc.spending.verdict}, since ${pc.spending.sinceLabel}. Averaging ${signed(pc.spending.averageUnder)} a month.`);
   L.push(`  ${stripText(pc.spending)}`, "");

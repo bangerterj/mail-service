@@ -174,7 +174,7 @@ const potsSchema = z.object({
     year: z.number().int(),
     month: z.number().int().min(1).max(12),
     savings: z
-      .object({ ...potsStrip, savedToDate: z.number().finite(), targetToDate: z.number().finite(), target: z.number().finite(), span: z.string().max(60).nullable().optional() })
+      .object({ ...potsStrip, savedToDate: z.number().finite(), targetToDate: z.number().finite(), target: z.number().finite(), span: z.string().max(60).nullable().optional(), gaps: z.array(z.string().max(200)).max(4).optional() })
       .nullable(),
     spending: z.object({ ...potsStrip, averageUnder: z.number().finite(), sinceLabel: z.string().max(4) }),
   }),

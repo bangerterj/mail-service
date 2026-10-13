@@ -58,6 +58,7 @@ const POTS: PotsBlock = {
       targetToDate: 34_866,
       target: 3_740,
       span: "Jan–Sep",
+      gaps: ["Employer match is counted through Jun 30, the latest plan statement."],
       cells: [
         { label: "J", state: "miss", delta: -530 },
         { label: "F", state: "miss", delta: -350 },
@@ -165,6 +166,8 @@ describe("financial-health-daily — three pots", () => {
     // Names the months it scored, rather than claiming "by now".
     expect(out.text).toContain("Savings: on track. $35,790 saved Jan–Sep; plan says $34,866 for those months ($3,740 a month).");
     expect(out.html).toContain("saved Jan–Sep · plan says $34,866 for those months");
+    // What is missing is named, not estimated.
+    expect(out.text).toContain("Not in yet: Employer match is counted through Jun 30, the latest plan statement.");
     expect(out.text).toContain("Averaging +$102 a month.");
     // Months before the plan are not listed in prose.
     expect(out.text).not.toContain("before the plan");

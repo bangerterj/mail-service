@@ -167,7 +167,7 @@ export interface TemplateData {
       planCheck: {
         year: number;
         month: number;
-        savings: { verdict: "on track" | "behind" | "no data"; cells: Array<{ label: string; state: "hit" | "miss" | "now" | "pre" | "future" | "none"; delta: number | null }>; savedToDate: number; targetToDate: number; target: number; span?: string | null } | null;
+        savings: { verdict: "on track" | "behind" | "no data"; cells: Array<{ label: string; state: "hit" | "miss" | "now" | "pre" | "future" | "none"; delta: number | null }>; savedToDate: number; targetToDate: number; target: number; span?: string | null; gaps?: string[] } | null;
         spending: { verdict: "in balance" | "out of balance" | "no data"; cells: Array<{ label: string; state: "hit" | "miss" | "now" | "pre" | "future" | "none"; delta: number | null }>; averageUnder: number; sinceLabel: string };
       };
       charges: Array<{ group: string; total: number; rows: Array<{ merchant: string; amount: number; tag: string; note: string; pending?: boolean; askUrl?: string }> }>;
