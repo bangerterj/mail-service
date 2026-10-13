@@ -71,7 +71,8 @@ export interface PotsBlock {
   planCheck: {
     year: number;
     month: number;
-    savings: (PotsStrip & { savedToDate: number; targetToDate: number; target: number }) | null;
+    /** `span` names the months scored — "Jan–Aug" — since unscored months are left out of both sides. */
+    savings: (PotsStrip & { savedToDate: number; targetToDate: number; target: number; span?: string | null }) | null;
     spending: PotsStrip & { averageUnder: number; sinceLabel: string };
   };
   charges: Array<{
@@ -561,7 +562,7 @@ export function FinancialHealthDailyPotsEmail(p: FinancialHealthDailyProps & { p
                                 <td>
                                   <div style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: "14px" }}>Savings</div>
                                   <div style={{ ...small, marginTop: "1px" }}>
-                                    {plain(pc.savings.savedToDate)} saved this year · plan says {plain(pc.savings.targetToDate)} by now
+                                    {plain(pc.savings.savedToDate)} saved {pc.savings.span ?? "this year"} · plan says {plain(pc.savings.targetToDate)} for those months
                                   </div>
                                 </td>
                                 <td align="right" style={{ verticalAlign: "top" }}>
@@ -848,7 +849,7 @@ export function financialHealthDailyPotsText(p: FinancialHealthDailyProps & { po
   const pc = pots.planCheck;
   L.push(`PLAN CHECK — ${pc.year}, month ${pc.month} of 12`);
   if (pc.savings) {
-    L.push(`Savings: ${pc.savings.verdict}. ${plain(pc.savings.savedToDate)} saved this year; plan says ${plain(pc.savings.targetToDate)} by now (${plain(pc.savings.target)} a month).`);
+    L.push(`Savings: ${pc.savings.verdict}. ${plain(pc.savings.savedToDate)} saved ${pc.savings.span ?? "this year"}; plan says ${plain(pc.savings.targetToDate)} for those months (${plain(pc.savings.target)} a month).`);
     L.push(`  ${stripText(pc.savings)}`);
   }
   L.push(`Spending: ${pc.spending.verdict}, since ${pc.spending.sinceLabel}. Averaging ${signed(pc.spending.averageUnder)} a month.`);
