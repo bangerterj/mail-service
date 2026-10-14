@@ -153,6 +153,26 @@ export interface TemplateData {
     person?: { name: string; share: number };
     /** The household total behind a personal hero. */
     household?: { budget: number; spent: number };
+    /**
+     * Three pots, a plan check and the fun fund — the three-pot layout. Shapes
+     * mirror emails/financial-health/daily-pots.tsx `PotsBlock`; every figure is
+     * the app's, the template only places it.
+     */
+    pots?: {
+      reader: string | null;
+      monthBudget: number;
+      jars: Array<{ key: string; label: string; mine: boolean; budget: number; spent: number; left: number; paceTarget: number; diff: number; verdict: "on pace" | "a bit ahead" | "ahead" }>;
+      shared: { budget: number; spent: number; left: number; paceTarget: number; diff: number; perDayToLast: number; runDry: string | null; oneOffs: number; oneOffNote: string | null; whoSpent: Array<{ name: string; amount: number }> };
+      fund: { year: number; seed: number; startLabel: string; balance: number; settledBalance: number; added: number; takenOut: number; months: Array<{ label: string; delta: number | null; projected: boolean }>; note: string };
+      planCheck: {
+        year: number;
+        month: number;
+        savings: { verdict: "on track" | "behind" | "no data"; cells: Array<{ label: string; state: "hit" | "miss" | "now" | "pre" | "future" | "none"; delta: number | null; value?: number | null }>; savedToDate: number; targetToDate: number; earnedToDate?: number; target: number; span?: string | null; gaps?: string[] } | null;
+        spending: { verdict: "in balance" | "out of balance" | "no data"; cells: Array<{ label: string; state: "hit" | "miss" | "now" | "pre" | "future" | "none"; delta: number | null }>; averageUnder: number; sinceLabel: string };
+      };
+      charges: Array<{ group: string; total: number; rows: Array<{ merchant: string; amount: number; tag: string; note: string; pending?: boolean; askUrl?: string }> }>;
+      privacyNote: string | null;
+    };
     /** Everything that left the account this month, budget or no budget. */
     monthToDate?: { total: number; committed: number; discretionary: number; setAside: number };
     dailyLine?: string;

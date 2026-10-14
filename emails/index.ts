@@ -117,6 +117,91 @@ function defineTokens<S extends z.ZodTypeAny>(
   return { ...def, kind: "tokens" };
 }
 
+
+/** The three-pot section of financial-health-daily. Every figure is computed by the app. */
+const potsCell = z.object({
+  label: z.string().max(4),
+  state: z.enum(["hit", "miss", "now", "pre", "future", "none"]),
+  delta: z.number().finite().nullable(),
+  value: z.number().finite().nullable().optional(),
+});
+const potsStrip = {
+  verdict: z.enum(["on track", "behind", "in balance", "out of balance", "no data"]),
+  cells: z.array(potsCell).max(12),
+};
+const potsSchema = z.object({
+  reader: z.string().min(1).max(60).nullable(),
+  monthBudget: z.number().finite(),
+  jars: z
+    .array(
+      z.object({
+        key: z.string().min(1).max(60),
+        label: z.string().min(1).max(60),
+        mine: z.boolean(),
+        budget: z.number().finite(),
+        spent: z.number().finite(),
+        left: z.number().finite(),
+        paceTarget: z.number().finite(),
+        diff: z.number().finite(),
+        verdict: z.enum(["on pace", "a bit ahead", "ahead"]),
+      }),
+    )
+    .min(2)
+    .max(6),
+  shared: z.object({
+    budget: z.number().finite(),
+    spent: z.number().finite(),
+    left: z.number().finite(),
+    paceTarget: z.number().finite(),
+    diff: z.number().finite(),
+    perDayToLast: z.number().finite(),
+    runDry: z.string().max(20).nullable(),
+    oneOffs: z.number().finite(),
+    oneOffNote: z.string().max(300).nullable(),
+    whoSpent: z.array(z.object({ name: z.string().min(1).max(60), amount: z.number().finite() })).max(6),
+  }),
+  fund: z.object({
+    year: z.number().int(),
+    seed: z.number().finite(),
+    startLabel: z.string().max(4),
+    balance: z.number().finite(),
+    settledBalance: z.number().finite(),
+    added: z.number().finite(),
+    takenOut: z.number().finite(),
+    months: z.array(z.object({ label: z.string().max(4), delta: z.number().finite().nullable(), projected: z.boolean() })).max(12),
+    note: z.string().min(1).max(400),
+  }),
+  planCheck: z.object({
+    year: z.number().int(),
+    month: z.number().int().min(1).max(12),
+    savings: z
+      .object({ ...potsStrip, savedToDate: z.number().finite(), targetToDate: z.number().finite(), earnedToDate: z.number().finite().optional(), target: z.number().finite(), span: z.string().max(60).nullable().optional(), gaps: z.array(z.string().max(200)).max(4).optional() })
+      .nullable(),
+    spending: z.object({ ...potsStrip, averageUnder: z.number().finite(), sinceLabel: z.string().max(4) }),
+  }),
+  charges: z
+    .array(
+      z.object({
+        group: z.string().min(1).max(60),
+        total: z.number().finite(),
+        rows: z
+          .array(
+            z.object({
+              merchant: z.string().min(1).max(120),
+              amount: z.number().finite(),
+              tag: z.string().min(1).max(60),
+              note: z.string().max(200),
+              pending: z.boolean().optional(),
+              askUrl: z.string().url().optional(),
+            }),
+          )
+          .max(100),
+      }),
+    )
+    .max(10),
+  privacyNote: z.string().max(300).nullable(),
+});
+
 export const templates = {
   "password-reset": define({
     category: "transactional",
@@ -420,6 +505,7 @@ export const templates = {
       }),
       person: z.object({ name: z.string().min(1).max(60), share: z.number().finite() }).optional(),
       household: z.object({ budget: z.number().finite(), spent: z.number().finite() }).optional(),
+      pots: potsSchema.optional(),
       monthToDate: z
         .object({
           total: z.number(),
