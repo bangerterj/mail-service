@@ -27,9 +27,9 @@ const DATA: Record<(typeof FP)[number], Record<string, string>> = {
     preferencesUrl: "https://familypantree.com/prefs",
   },
   "familypantree-household-invite": {
-    inviterFirstName: "Jeff",
-    inviterEmail: "jeff@familypantree.com",
-    householdName: "The Bangerters",
+    inviterFirstName: "Alex",
+    inviterEmail: "alex@familypantree.com",
+    householdName: "The Riveras",
     memberCount: "9 people",
     storeCount: "3 stores",
     stapleCount: "42 staples",
@@ -40,7 +40,7 @@ const DATA: Record<(typeof FP)[number], Record<string, string>> = {
     reportUrl: "mailto:abuse@familypantree.com",
   },
   "familypantree-group-invite": {
-    inviterFirstName: "Jeff",
+    inviterFirstName: "Alex",
     groupName: "Weeknight Dinners",
     memberCount: "4 people",
     recipeCount: "18 recipes",
@@ -83,7 +83,7 @@ describe("familypantree templates", () => {
       "Family Pantree",
       UNSUB,
     );
-    for (const fact of ["9 people", "3 stores", "42 staples", "The Bangerters"]) {
+    for (const fact of ["9 people", "3 stores", "42 staples", "The Riveras"]) {
       expect(out.html).toContain(fact);
       expect(out.text).toContain(fact);
     }

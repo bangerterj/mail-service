@@ -203,7 +203,7 @@ const footerLink: React.CSSProperties = { color: "#888", textDecoration: "underl
 
 BanterRecapEmail.PreviewProps = {
   appName: "Banter",
-  items: ["Jeff replied to your post", "Sam reacted to your comment"],
+  items: ["Alex replied to your post", "Sam reacted to your comment"],
   viewUrl: "https://banter.camp/notifications",
   unsubscribeUrl: "https://banter.camp/settings/notifications?token=preview",
 } satisfies BanterRecapProps;
