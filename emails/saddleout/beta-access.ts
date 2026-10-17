@@ -67,7 +67,7 @@ export const SADDLEOUT_BETA_ACCESS_HTML = `<!DOCTYPE html>
 <tr><td class="pad" style="padding:24px 28px 0 28px; ${MONO} font-size:11px; letter-spacing:2px; color:#8A5A0B; line-height:16px;">2 &middot; LINK YOUR GAME</td></tr>
 <tr><td class="pad" style="padding:6px 28px 0 28px; ${F} font-size:15px; color:#3A4238; line-height:23px;">Open SaddleOut &gt; Settings &gt; Account and note the code, then enter it at <a href="https://saddleout.com/link" style="color:#8A5A0B;">saddleout.com/link</a>.</td></tr>
 <tr><td class="pad" style="padding:24px 28px 0 28px; ${MONO} font-size:11px; letter-spacing:2px; color:#8A5A0B; line-height:16px;">3 &middot; BUILD YOUR OWN ROUTE</td></tr>
-<tr><td class="pad" style="padding:6px 28px 0 28px; ${F} font-size:15px; color:#3A4238; line-height:23px;">On <a href="https://saddleout.com" style="color:#8A5A0B;">saddleout.com</a>, go to Account &gt; Create and upload a GPX (1&ndash;20 miles). It takes about 30 minutes, and we&rsquo;ll email you when it&rsquo;s ready.</td></tr>
+<tr><td class="pad" style="padding:6px 28px 0 28px; ${F} font-size:15px; color:#3A4238; line-height:23px;">Upload a GPX at <a href="https://saddleout.com/create" style="color:#8A5A0B;">saddleout.com/create</a> (1&ndash;20 miles). It takes about 30 minutes, and we&rsquo;ll email you when it&rsquo;s ready.</td></tr>
 <tr><td class="pad" style="padding:24px 28px 0 28px; ${MONO} font-size:11px; letter-spacing:2px; color:#8A5A0B; line-height:16px;">4 &middot; SEND FEEDBACK</td></tr>
 <tr><td class="pad" style="padding:6px 28px 0 28px; ${F} font-size:15px; color:#3A4238; line-height:23px;">Use SEND FEEDBACK in the game, or just reply to this email. It's an early build, so tell us what breaks.</td></tr>
 <tr><td class="pad" style="padding:32px 28px 0 28px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td height="1" bgcolor="#E3E1D5" style="background-color:#E3E1D5; font-size:0; line-height:0;">&nbsp;</td></tr></table></td></tr>
@@ -94,8 +94,7 @@ Open SaddleOut > Settings > Account and note the code, then enter it at
 saddleout.com/link
 
 3. BUILD YOUR OWN ROUTE
-On saddleout.com, go to Account > Create and upload a GPX (1-20 miles). It takes
-about 30 minutes, and we'll email you when it's ready.
+Upload a GPX at saddleout.com/create (1-20 miles). It takes about 30 minutes, and we'll email you when it's ready.
 
 4. SEND FEEDBACK
 Use SEND FEEDBACK in the game, or just reply to this email. It's an early build,
