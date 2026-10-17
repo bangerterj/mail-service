@@ -42,7 +42,7 @@ export const SADDLEOUT_BETA_ACCESS_HTML = `<!DOCTYPE html>
 </style>
 </head>
 <body style="margin:0; padding:0; background-color:#EDECE4;">
-<span style="display:none !important; visibility:hidden; opacity:0; color:transparent; height:0; width:0; overflow:hidden; mso-hide:all;">Your install links are ready {devices}.</span>
+<span style="display:none !important; visibility:hidden; opacity:0; color:transparent; height:0; width:0; overflow:hidden; mso-hide:all;">Install, link your game, build a route.</span>
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#EDECE4;">
 <tr><td align="center" style="padding:32px 12px;">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" class="wrap" style="width:560px; max-width:560px; background-color:#FBFAF5; border:1px solid #E3E1D5; border-radius:6px; overflow:hidden;">
@@ -54,19 +54,22 @@ export const SADDLEOUT_BETA_ACCESS_HTML = `<!DOCTYPE html>
 </td></tr>
 <tr><td class="pad" style="padding:32px 28px 0 28px; ${MONO} font-size:11px; letter-spacing:2px; color:#8A5A0B; line-height:16px;">BETA ACCESS</td></tr>
 <tr><td class="pad h1" style="padding:8px 28px 0 28px; ${HEAD} font-size:34px; font-weight:bold; color:#0E1410; line-height:38px;">You're in, {name}.</td></tr>
-<tr><td class="pad" style="padding:14px 28px 0 28px; ${F} font-size:16px; color:#3A4238; line-height:24px;">The SaddleOut beta is open to you now. Your install links are waiting on your SaddleOut page, {devices}. Install it, open the game, and link it to your account with the code it shows.</td></tr>
-<tr><td class="pad" style="padding:22px 28px 0 28px;">
+<tr><td class="pad" style="padding:14px 28px 0 28px; ${F} font-size:15px; color:#3A4238; line-height:23px;">You're in the SaddleOut beta. Here's how to get riding, {devices}.</td></tr>
+<tr><td class="pad" style="padding:24px 28px 0 28px; ${MONO} font-size:11px; letter-spacing:2px; color:#8A5A0B; line-height:16px;">1 &middot; INSTALL</td></tr>
+<tr><td class="pad" style="padding:6px 28px 0 28px; ${F} font-size:15px; color:#3A4238; line-height:23px;">Your install buttons are on your SaddleOut page: the PC download, the TestFlight link for iPhone and iPad, and for Android, (1) join the tester group, then (2) install from Google Play.</td></tr>
+<tr><td class="pad" style="padding:16px 28px 0 28px;">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
 <td bgcolor="#F2A72C" style="background-color:#F2A72C; border-radius:4px;">
 <a href="{pageUrl}" style="display:block; padding:14px 26px; ${F} font-size:16px; font-weight:bold; color:#0E1410; text-decoration:none; line-height:20px;">Get SaddleOut</a>
 </td>
 </tr></table>
 </td></tr>
-<tr><td class="pad" style="padding:24px 28px 0 28px;">
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
-<td bgcolor="#F8F7F1" style="background-color:#F8F7F1; border-left:3px solid #E3E1D5; padding:12px 16px; ${F} font-size:13px; color:#3A4238; line-height:19px;"><strong style="color:#0E1410;">It's an early build.</strong> Routes, visuals and trainer support are still in progress. Tell us what breaks: that's the whole point.</td>
-</tr></table>
-</td></tr>
+<tr><td class="pad" style="padding:24px 28px 0 28px; ${MONO} font-size:11px; letter-spacing:2px; color:#8A5A0B; line-height:16px;">2 &middot; LINK YOUR GAME</td></tr>
+<tr><td class="pad" style="padding:6px 28px 0 28px; ${F} font-size:15px; color:#3A4238; line-height:23px;">Open SaddleOut &gt; Settings &gt; Account and note the code, then enter it at <a href="https://saddleout.com/link" style="color:#8A5A0B;">saddleout.com/link</a>.</td></tr>
+<tr><td class="pad" style="padding:24px 28px 0 28px; ${MONO} font-size:11px; letter-spacing:2px; color:#8A5A0B; line-height:16px;">3 &middot; BUILD YOUR OWN ROUTE</td></tr>
+<tr><td class="pad" style="padding:6px 28px 0 28px; ${F} font-size:15px; color:#3A4238; line-height:23px;">On <a href="https://saddleout.com" style="color:#8A5A0B;">saddleout.com</a>, go to Account &gt; Create and upload a GPX (1&ndash;20 miles). It takes about 30 minutes, and we&rsquo;ll email you when it&rsquo;s ready.</td></tr>
+<tr><td class="pad" style="padding:24px 28px 0 28px; ${MONO} font-size:11px; letter-spacing:2px; color:#8A5A0B; line-height:16px;">4 &middot; SEND FEEDBACK</td></tr>
+<tr><td class="pad" style="padding:6px 28px 0 28px; ${F} font-size:15px; color:#3A4238; line-height:23px;">Use SEND FEEDBACK in the game, or just reply to this email. It's an early build, so tell us what breaks.</td></tr>
 <tr><td class="pad" style="padding:32px 28px 0 28px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td height="1" bgcolor="#E3E1D5" style="background-color:#E3E1D5; font-size:0; line-height:0;">&nbsp;</td></tr></table></td></tr>
 <tr><td class="pad" style="padding:18px 28px 0 28px; ${F} font-size:12px; color:#7A8476; line-height:18px;">You're getting this because you signed up for the SaddleOut beta and asked us to email you about access.</td></tr>
 <tr><td class="pad" style="padding:8px 28px 28px 28px; ${F} font-size:12px; color:#7A8476; line-height:18px;"><a href="https://saddleout.com/account" style="color:#7A8476; text-decoration:underline;">Account</a> &middot; <a href="https://saddleout.com/privacy" style="color:#7A8476; text-decoration:underline;">Privacy</a> &middot; SaddleOut, Mission Viejo, CA</td></tr>
@@ -78,14 +81,25 @@ export const SADDLEOUT_BETA_ACCESS_HTML = `<!DOCTYPE html>
 
 export const SADDLEOUT_BETA_ACCESS_TEXT = `You're in, {name}.
 
-The SaddleOut beta is open to you now. Your install links are waiting on your
-SaddleOut page, {devices}. Install it, open the game, and link it to your
-account with the code it shows.
+You're in the SaddleOut beta. Here's how to get riding, {devices}.
 
+1. INSTALL
+Your install links are on your SaddleOut page: the PC download, the TestFlight
+link for iPhone and iPad, and for Android, (1) join the tester group, then
+(2) install from Google Play.
 Get SaddleOut: {pageUrl}
 
-It's an early build. Routes, visuals and trainer support are still in progress.
-Tell us what breaks: that's the whole point.
+2. LINK YOUR GAME
+Open SaddleOut > Settings > Account and note the code, then enter it at
+saddleout.com/link
+
+3. BUILD YOUR OWN ROUTE
+On saddleout.com, go to Account > Create and upload a GPX (1-20 miles). It takes
+about 30 minutes, and we'll email you when it's ready.
+
+4. SEND FEEDBACK
+Use SEND FEEDBACK in the game, or just reply to this email. It's an early build,
+so tell us what breaks.
 
 You're getting this because you signed up for the SaddleOut beta and asked us to
 email you about access.
