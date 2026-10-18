@@ -68,7 +68,7 @@ export function SaddleoutMessageEmail({ body, ctaUrl, ctaLabel }: SaddleoutMessa
                 )}
                 <tr><td style={cell({ paddingTop: 28 })}><div style={{ height: 1, backgroundColor: "#E3E1D5", fontSize: 0, lineHeight: 0 }}>&nbsp;</div></td></tr>
                 <tr><td style={cell({ paddingTop: 16, paddingBottom: 28, fontFamily: F, fontSize: 12, color: "#7A8476", lineHeight: "18px" })}>
-                  Just reply to this email. &middot; SaddleOut, Mission Viejo, CA
+                  Just reply to this email.
                 </td></tr>
               </tbody>
             </table>
@@ -82,6 +82,6 @@ export function SaddleoutMessageEmail({ body, ctaUrl, ctaLabel }: SaddleoutMessa
 export function saddleoutMessageText({ body, ctaUrl, ctaLabel }: SaddleoutMessageProps): string {
   const out = [body.replace(/\r\n?/g, "\n").trim()];
   if (ctaUrl) out.push("", `${ctaLabel || "Open SaddleOut"}: ${ctaUrl}`);
-  out.push("", "Just reply to this email.", "SaddleOut, Mission Viejo, CA");
+  out.push("", "Just reply to this email.");
   return out.join("\n");
 }

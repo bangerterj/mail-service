@@ -72,7 +72,7 @@ ${picture}<tr><td class="pad" style="padding:30px 28px 0 28px; ${MONO} font-size
 </td></tr>
 <tr><td class="pad" style="padding:32px 28px 0 28px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td height="1" bgcolor="#E3E1D5" style="background-color:#E3E1D5; font-size:0; line-height:0;">&nbsp;</td></tr></table></td></tr>
 <tr><td class="pad" style="padding:18px 28px 0 28px; ${F} font-size:12px; color:#7A8476; line-height:18px;">You're getting this because you asked SaddleOut to build a route from your ride. Map data &copy; OpenStreetMap contributors.</td></tr>
-<tr><td class="pad" style="padding:8px 28px 28px 28px; ${F} font-size:12px; color:#7A8476; line-height:18px;"><a href="https://saddleout.com/account" style="color:#7A8476; text-decoration:underline;">Account</a> &middot; <a href="https://saddleout.com/privacy" style="color:#7A8476; text-decoration:underline;">Privacy</a> &middot; SaddleOut, Mission Viejo, CA</td></tr>
+<tr><td class="pad" style="padding:8px 28px 28px 28px; ${F} font-size:12px; color:#7A8476; line-height:18px;"><a href="https://saddleout.com/account" style="color:#7A8476; text-decoration:underline;">Account</a> &middot; <a href="https://saddleout.com/privacy" style="color:#7A8476; text-decoration:underline;">Privacy</a> &middot; SaddleOut, Long Beach, CA</td></tr>
 </table>
 </td></tr>
 </table>
@@ -96,7 +96,7 @@ You're getting this because you asked SaddleOut to build a route from your ride.
 Map data (c) OpenStreetMap contributors.
 Account: https://saddleout.com/account
 Privacy: https://saddleout.com/privacy
-SaddleOut, Mission Viejo, CA`;
+SaddleOut, Long Beach, CA`;
 
 export const SADDLEOUT_ROUTE_UPDATE_TEXT = TEXT;
 export const SADDLEOUT_ROUTE_READY_TEXT = `${TEXT}
