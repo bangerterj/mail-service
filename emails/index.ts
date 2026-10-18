@@ -66,6 +66,11 @@ import {
   SADDLEOUT_ROUTE_UPDATE_TEXT,
   SADDLEOUT_ROUTE_UPDATE_TOKENS,
 } from "./saddleout/route-update";
+import {
+  SADDLEOUT_MESSAGE_SUBJECT,
+  SaddleoutMessageEmail,
+  saddleoutMessageText,
+} from "./saddleout/message";
 import { BanterRecapEmail, banterRecapText } from "./banter/recap";
 import {
   FinancialHealthDailyEmail,
@@ -457,6 +462,19 @@ export const templates = {
       buttonUrl: z.string().url(),
       imageUrl: z.string().url(),
     }),
+  }),
+  // A one-to-one reply from /admin/feedback to a rider who wrote in. Body is plain text, escaped.
+  "saddleout-message": define({
+    category: "transactional",
+    schema: z.object({
+      name: z.string().min(1).max(60),
+      body: z.string().min(1).max(5000),
+      ctaUrl: z.string().url().optional(),
+      ctaLabel: z.string().min(1).max(40).optional(),
+    }),
+    subject: () => SADDLEOUT_MESSAGE_SUBJECT,
+    component: (props) => React.createElement(SaddleoutMessageEmail, props),
+    text: saddleoutMessageText,
   }),
   "banter-signin": defineTokens({
     category: "transactional",

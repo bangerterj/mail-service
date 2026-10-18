@@ -23,6 +23,7 @@ describe("template registry", () => {
         "saddleout-beta-access",
         "saddleout-route-update",
         "saddleout-route-ready",
+        "saddleout-message",
         "familypantree-household-invite",
         "familypantree-group-invite",
         "banter-signin",

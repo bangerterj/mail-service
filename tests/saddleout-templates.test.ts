@@ -96,3 +96,22 @@ describe("saddleout-route-update / -ready", () => {
     expect(ready.html).toContain('src="https://saddleout.com/api/map-jobs/abc/picture?n=p.jpg&amp;t=x"');
   });
 });
+
+describe("saddleout-message", () => {
+  it("escapes the body, keeps paragraphs and line breaks, and adds the optional button", async () => {
+    const out = await renderTemplate("saddleout-message", {
+      name: "trailrat",
+      body: "Hi trailrat,\n\nThanks for the <b>report</b> & the GPX.\nFixed in 2.2.12.\n\nJeff",
+      ctaUrl: "https://saddleout.com/create",
+      ctaLabel: "Build a route",
+    }, "SaddleOut");
+    const r = out as unknown as { html: string; text: string; subject: string };
+    expect(r.subject).toBe("A message from SaddleOut");
+    expect(r.html).toContain("&lt;b&gt;report&lt;/b&gt; &amp; the GPX.<br/>Fixed in 2.2.12.");
+    expect(r.html).not.toContain("<b>report");
+    expect(r.html).toContain('href="https://saddleout.com/create"');
+    expect(r.html).toContain("Just reply to this email.");
+    expect(r.text).toContain("Thanks for the <b>report</b> & the GPX.\nFixed in 2.2.12.");
+    expect(templates["saddleout-message"].category).toBe("transactional");
+  });
+});
