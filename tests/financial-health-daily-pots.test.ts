@@ -146,6 +146,14 @@ describe("financial-health-daily — three pots", () => {
     expect(out.subject).toBe("Sun Oct 11 · $1,575 left · $436 under pace");
   });
 
+  it("totals the three pots, so the household's spending is one figure", async () => {
+    const out = await render();
+    // 107 + 1,057 + 780 = 1,944 spent of 5,046; pace 3 × 543 = 1,629.
+    expect(out.html).toContain("$1,944");
+    expect(out.html).toContain("$3,102 left");
+    expect(out.text).toContain("Together: $1,944 spent of $5,046 · $3,102 left · $315 over pace.");
+  });
+
   it("names every jar with what is left and its verdict", async () => {
     const out = await render();
     expect(out.text).toContain("You: $1,575 left of $1,682 · On pace");

@@ -224,6 +224,13 @@ function CardHead({ title, aside }: { title: string; aside?: string }) {
   );
 }
 
+/** All three pots together — the figure the jars don't give at a glance. */
+export function householdTotals(pots: PotsBlock): { spent: number; pace: number; left: number; diff: number } {
+  const spent = pots.jars.reduce((t, j) => t + j.spent, 0);
+  const pace = pots.jars.reduce((t, j) => t + j.paceTarget, 0);
+  return { spent, pace, left: pots.monthBudget - spent, diff: spent - pace };
+}
+
 /** A progress bar with a pace notch, as cells: fill, gap, notch, rest. */
 function Bar({ frac, paceFrac, colour }: { frac: number; paceFrac: number; colour: string }) {
   const f = Math.round(Math.min(1, Math.max(0, frac)) * 100);
@@ -472,6 +479,7 @@ export function FinancialHealthDailyPotsEmail(p: FinancialHealthDailyProps & { p
   const pots = p.pots;
   const daysLeft = Math.max(1, p.daysInMonth - p.dayOfMonth + 1);
   const elapsedFrac = Math.max(0, p.dayOfMonth - 1) / p.daysInMonth;
+  const household = householdTotals(pots);
   const mine = pots.jars.find((j) => j.mine) ?? pots.jars[0];
   const myColour = colourFor(mine.key, pots.jars);
   const perDay = Math.max(0, mine.left) / daysLeft;
@@ -547,6 +555,25 @@ export function FinancialHealthDailyPotsEmail(p: FinancialHealthDailyProps & { p
                     {/* 2 · The household */}
                     <Card>
                       <CardHead title="The household" aside={`${plain(pots.monthBudget)} a month · split in thirds`} />
+                      <table {...T} width="100%" style={{ width: "100%", borderCollapse: "collapse" }}>
+                        <tbody>
+                          <tr>
+                            <td style={{ fontSize: "13.5px", color: "#55564A" }}>
+                              <b style={{ fontSize: "19px", color: INK, letterSpacing: "-0.02em" }}>{plain(household.spent)}</b> spent of {plain(pots.monthBudget)}
+                            </td>
+                            <td align="right" style={{ fontSize: "13px", fontWeight: 700, color: household.left < 0 ? RED : INK }}>
+                              {household.left < 0 ? `${plain(-household.left)} over` : `${plain(household.left)} left`}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <Bar frac={pots.monthBudget > 0 ? household.spent / pots.monthBudget : 0} paceFrac={elapsedFrac} colour={INK3} />
+                      <BarLegend
+                        left={`All three pots · pace ${plain(household.pace)}`}
+                        right={`${plain(Math.abs(household.diff))} ${household.diff > 0 ? "over" : "under"} pace`}
+                        rightColour={household.diff > 0 ? RED : GREEN}
+                      />
+                      <div style={{ height: "16px", lineHeight: "16px", fontSize: 0 }}>&nbsp;</div>
                       <table {...T} width="100%" style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
                         <tbody>
                           <tr>
@@ -858,6 +885,10 @@ export function financialHealthDailyPotsText(p: FinancialHealthDailyProps & { po
   L.push(`${plain(mine.spent)} of ${plain(mine.budget)} spent · pace ${plain(mine.paceTarget)} · ${plain(mine.diff)} ${mine.diff > 0 ? "over" : "under"} pace.`, "");
 
   L.push(`THE HOUSEHOLD — ${plain(pots.monthBudget)} a month, split in thirds`);
+  {
+    const h = householdTotals(pots);
+    L.push(`Together: ${plain(h.spent)} spent of ${plain(pots.monthBudget)} · ${h.left < 0 ? `${plain(-h.left)} over` : `${plain(h.left)} left`} · ${plain(Math.abs(h.diff))} ${h.diff > 0 ? "over" : "under"} pace.`);
+  }
   for (const j of pots.jars) {
     L.push(j.left < 0 ? `${j.label}: ${plain(j.left)} over its ${plain(j.budget)}` : `${j.label}: ${money(j.left)} left of ${plain(j.budget)} · ${verdictText(j).text}`);
   }
