@@ -144,6 +144,10 @@ const potsSchema = z.object({
         paceTarget: z.number().finite(),
         diff: z.number().finite(),
         verdict: z.enum(["on pace", "a bit ahead", "ahead"]),
+        // A pot that runs over is paid for by the others; older payloads omit these.
+        ownSpent: z.number().finite().optional(),
+        absorbed: z.number().finite().optional(),
+        passedOn: z.number().finite().optional(),
       }),
     )
     .min(2)

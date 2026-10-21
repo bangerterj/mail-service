@@ -154,6 +154,29 @@ describe("financial-health-daily — three pots", () => {
     expect(out.text).toContain("Together: $1,944 spent of $5,046 · $3,102 left · $315 over pace.");
   });
 
+  it("shows a pot's overspend as carried by the others", async () => {
+    const spread = {
+      ...DATA,
+      pots: {
+        ...POTS,
+        monthBudget: 7_713,
+        jars: [
+          { key: "Jeff", label: "You", mine: true, budget: 2_571, spent: 1_042, left: 1_529, paceTarget: 1_576, diff: -534, verdict: "on pace" as const, ownSpent: 212, absorbed: 830, passedOn: 0 },
+          { key: "Shared", label: "Shared", mine: false, budget: 2_571, spent: 2_571, left: 0, paceTarget: 1_576, diff: 995, verdict: "ahead" as const, ownSpent: 4_230, absorbed: 0, passedOn: 1_659 },
+          { key: "Kelli", label: "Kelli", mine: false, budget: 2_571, spent: 1_440, left: 1_131, paceTarget: 1_576, diff: -136, verdict: "on pace" as const, ownSpent: 610, absorbed: 830, passedOn: 0 },
+        ],
+      },
+    };
+    expect(templates["financial-health-daily"].schema.safeParse(spread).success).toBe(true);
+    const out = await render(spread);
+    expect(out.html).toContain("$1,659 over, split between the others");
+    expect(out.html).toContain("spent $4,230 of $2,571");
+    expect(out.html).toContain("after $830 of overspend");
+    expect(out.text).toContain("$1,042 of $2,571 spent ($212 yours + $830 of the overspend)");
+    // The jars still add up to the household: 1,529 + 0 + 1,131 = 2,660 left.
+    expect(out.text).toContain("$2,660 left");
+  });
+
   it("names every jar with what is left and its verdict", async () => {
     const out = await render();
     expect(out.text).toContain("You: $1,575 left of $1,682 · On pace");

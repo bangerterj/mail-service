@@ -161,7 +161,7 @@ export interface TemplateData {
     pots?: {
       reader: string | null;
       monthBudget: number;
-      jars: Array<{ key: string; label: string; mine: boolean; budget: number; spent: number; left: number; paceTarget: number; diff: number; verdict: "on pace" | "a bit ahead" | "ahead" }>;
+      jars: Array<{ key: string; label: string; mine: boolean; budget: number; spent: number; left: number; paceTarget: number; diff: number; verdict: "on pace" | "a bit ahead" | "ahead"; ownSpent?: number; absorbed?: number; passedOn?: number }>;
       shared: { budget: number; spent: number; left: number; paceTarget: number; diff: number; perDayToLast: number; runDry: string | null; oneOffs: number; oneOffNote: string | null; whoSpent: Array<{ name: string; amount: number }> };
       fund: { year: number; seed: number; startLabel: string; balance: number; settledBalance: number; added: number; takenOut: number; months: Array<{ label: string; delta: number | null; projected: boolean }>; note: string };
       planCheck: {
