@@ -34,6 +34,12 @@ export interface PotsJar {
   paceTarget: number;
   diff: number;
   verdict: "on pace" | "a bit ahead" | "ahead";
+  /** Spent on this pot's own account; `spent` adds what it took on from others. */
+  ownSpent?: number;
+  /** Other pots' overspend this pot is now carrying. */
+  absorbed?: number;
+  /** This pot's own overspend, carried by the others. */
+  passedOn?: number;
 }
 
 export interface PotsStrip {
@@ -159,11 +165,17 @@ function colourFor(key: string, jars: PotsJar[]): string {
   return people.indexOf(key) === 0 ? GREEN : BLUE;
 }
 
-function verdictText(j: Pick<PotsJar, "verdict" | "diff" | "left">): { text: string; colour: string } {
+function verdictText(j: Pick<PotsJar, "verdict" | "diff" | "left" | "passedOn">): { text: string; colour: string } {
   if (j.left < 0) return { text: `${plain(j.left)} over`, colour: RED };
+  if (j.passedOn && j.passedOn > 0) return { text: `${plain(j.passedOn)} over, split between the others`, colour: RED };
   if (j.verdict === "on pace") return { text: "On pace", colour: GREEN };
   if (j.verdict === "a bit ahead") return { text: "A bit ahead", colour: RED };
   return { text: `${plain(j.diff)} ahead of pace`, colour: RED };
+}
+
+/** "(212 yours + 829 of the overspend)" when a pot is carrying another's overspend. */
+function absorbedNote(j: PotsJar): string {
+  return j.absorbed && j.absorbed > 0 ? ` (${plain(j.ownSpent ?? j.spent - j.absorbed)} yours + ${plain(j.absorbed)} of the overspend)` : "";
 }
 
 // ─── Geometry ──────────────────────────────────────────────────────────────
@@ -321,9 +333,20 @@ function Jar({ jar, colour, elapsedFrac, height }: { jar: PotsJar; colour: strin
         </tr>
         <tr>
           <td align="center" style={{ ...small, fontSize: "11px", paddingTop: "2px" }}>
-            {jar.left < 0 ? `over the ${plain(jar.budget)}` : `left of ${plain(jar.budget)}`}
+            {jar.left < 0
+              ? `over the ${plain(jar.budget)}`
+              : jar.passedOn && jar.passedOn > 0
+                ? `spent ${plain(jar.ownSpent ?? jar.spent)} of ${plain(jar.budget)}`
+                : `left of ${plain(jar.budget)}`}
           </td>
         </tr>
+        {jar.absorbed && jar.absorbed > 0 ? (
+          <tr>
+            <td align="center" style={{ ...small, fontSize: "11px" }}>
+              after {plain(jar.absorbed)} of overspend
+            </td>
+          </tr>
+        ) : null}
         <tr>
           <td align="center" style={{ fontSize: "11px", fontWeight: 700, paddingTop: "4px", color: v.colour }}>
             {v.text}
@@ -546,7 +569,7 @@ export function FinancialHealthDailyPotsEmail(p: FinancialHealthDailyProps & { p
                       </div>
                       <Bar frac={mine.budget > 0 ? mine.spent / mine.budget : 0} paceFrac={elapsedFrac} colour={myColour} />
                       <BarLegend
-                        left={`${plain(mine.spent)} of ${plain(mine.budget)} spent · pace ${plain(mine.paceTarget)}`}
+                        left={`${plain(mine.spent)} of ${plain(mine.budget)} spent${absorbedNote(mine)} · pace ${plain(mine.paceTarget)}`}
                         right={`${plain(mine.diff)} ${mine.diff > 0 ? "over" : "under"} pace`}
                         rightColour={mine.diff > 0 ? RED : GREEN}
                       />
@@ -882,7 +905,7 @@ export function financialHealthDailyPotsText(p: FinancialHealthDailyProps & { po
 
   L.push(`${pots.reader ? `${pots.reader.toUpperCase()} · YOURS TO SPEND` : "YOUR POT"} · ${daysLeft} days left`);
   L.push(`${money(mine.left)} left${mine.left >= 0 ? ` — ${plain(Math.max(0, mine.left) / daysLeft)} a day, on anything you like` : ""}.`);
-  L.push(`${plain(mine.spent)} of ${plain(mine.budget)} spent · pace ${plain(mine.paceTarget)} · ${plain(mine.diff)} ${mine.diff > 0 ? "over" : "under"} pace.`, "");
+  L.push(`${plain(mine.spent)} of ${plain(mine.budget)} spent${absorbedNote(mine)} · pace ${plain(mine.paceTarget)} · ${plain(mine.diff)} ${mine.diff > 0 ? "over" : "under"} pace.`, "");
 
   L.push(`THE HOUSEHOLD — ${plain(pots.monthBudget)} a month, split in thirds`);
   {
@@ -890,7 +913,11 @@ export function financialHealthDailyPotsText(p: FinancialHealthDailyProps & { po
     L.push(`Together: ${plain(h.spent)} spent of ${plain(pots.monthBudget)} · ${h.left < 0 ? `${plain(-h.left)} over` : `${plain(h.left)} left`} · ${plain(Math.abs(h.diff))} ${h.diff > 0 ? "over" : "under"} pace.`);
   }
   for (const j of pots.jars) {
-    L.push(j.left < 0 ? `${j.label}: ${plain(j.left)} over its ${plain(j.budget)}` : `${j.label}: ${money(j.left)} left of ${plain(j.budget)} · ${verdictText(j).text}`);
+    L.push(
+      j.left < 0
+        ? `${j.label}: ${plain(j.left)} over its ${plain(j.budget)}`
+        : `${j.label}: ${money(j.left)} left of ${plain(j.budget)}${j.absorbed ? ` (after ${plain(j.absorbed)} of overspend)` : ""} · ${verdictText(j).text}`
+    );
   }
   L.push("");
 
