@@ -142,7 +142,7 @@ Content-Type: application/json
 {
   "to": "user@example.com",              // string or string[], max 10
   "template": "password-reset",
-  "data": { "resetUrl": "https://...", "name": "Jeff" },
+  "data": { "resetUrl": "https://...", "name": "Alex" },
   "idempotencyKey": "optional-string"
 }
 ```

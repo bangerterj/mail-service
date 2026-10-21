@@ -40,7 +40,7 @@ export function welcomeText({ appName, name, actionUrl }: WelcomeEmailProps) {
 
 WelcomeEmail.PreviewProps = {
   appName: "Example App",
-  name: "Jeff",
+  name: "Alex",
   actionUrl: "https://example.com/dashboard",
 } satisfies WelcomeEmailProps;
 

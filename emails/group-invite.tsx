@@ -106,7 +106,7 @@ const scopeText: React.CSSProperties = {
 
 GroupInviteEmail.PreviewProps = {
   appName: "Family Pantree",
-  inviterName: "Jeff",
+  inviterName: "Alex",
   groupName: "Sunday Dinner Crew",
   acceptUrl: "https://familypantree.com/invite/group/preview",
   recipientName: "Sam",

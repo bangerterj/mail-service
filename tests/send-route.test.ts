@@ -256,7 +256,7 @@ const mentionBody = {
   to: "user@example.com",
   template: "mention",
   data: {
-    actorName: "Jeff",
+    actorName: "Alex",
     contextTitle: "Q3 planning",
     url: "https://alpha.test/t/1",
   },
@@ -366,9 +366,9 @@ describe("POST /api/send - SES configuration set", () => {
 
 describe("POST /api/send - token template errors", () => {
   const inviteData = {
-    inviterFirstName: "Jeff",
-    inviterEmail: "jeff@familypantree.com",
-    householdName: "The Bangerters",
+    inviterFirstName: "Alex",
+    inviterEmail: "alex@familypantree.com",
+    householdName: "The Riveras",
     memberCount: "9 people",
     storeCount: "3 stores",
     stapleCount: "42 staples",
@@ -406,6 +406,6 @@ describe("POST /api/send - token template errors", () => {
       }),
     );
     expect(res.status).toBe(202);
-    expect(sent[0].html).toContain("The Bangerters");
+    expect(sent[0].html).toContain("The Riveras");
   });
 });

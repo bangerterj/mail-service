@@ -62,8 +62,26 @@ function parseApps(raw: string | undefined): Map<string, AppConfig> {
 /** Exported for tests; the route uses the module-scope `apps` map. */
 export { parseApps };
 
+/**
+ * The app config for this process, given the raw env value and the Next.js phase.
+ *
+ * `next build` imports every route module to collect page data, which runs the
+ * module-scope parse below. Requiring APPS there meant a container image could
+ * only be built with every app's API key present at build time — and so baked
+ * into an image layer. An empty APPS is therefore allowed during the build
+ * phase only. A malformed one still fails the build, and an empty one still
+ * fails loud when the server starts.
+ */
+export function loadApps(
+  raw: string | undefined,
+  phase: string | undefined = process.env.NEXT_PHASE,
+): Map<string, AppConfig> {
+  if ((!raw || raw.trim() === "") && phase === "phase-production-build") return new Map();
+  return parseApps(raw);
+}
+
 // Parsed once at module load — fail loud at boot on misconfiguration.
-export const apps: Map<string, AppConfig> = parseApps(process.env.APPS);
+export const apps: Map<string, AppConfig> = loadApps(process.env.APPS);
 
 export const providerName = (process.env.EMAIL_PROVIDER ?? "ses") as "ses" | "console";
 

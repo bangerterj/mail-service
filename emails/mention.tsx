@@ -71,7 +71,7 @@ const quote: React.CSSProperties = {
 
 MentionEmail.PreviewProps = {
   appName: "Example App",
-  actorName: "Jeff",
+  actorName: "Alex",
   contextTitle: "Q3 planning",
   excerpt: "I think @you should own the rollout plan.",
   url: "https://example.com/threads/1#comment-2",

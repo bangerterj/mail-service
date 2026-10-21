@@ -5,7 +5,7 @@ const base = {
   to: ["user@example.com"],
   from: "noreply@alpha.test",
   fromName: "Alpha App",
-  subject: "Jeff mentioned you in Q3 planning",
+  subject: "Alex mentioned you in Q3 planning",
   html: "<p>hello</p>",
   text: "hello",
 };
@@ -16,7 +16,7 @@ describe("buildMimeMessage", () => {
     expect(mime).toContain("multipart/alternative");
     expect(mime).toContain("text/plain");
     expect(mime).toContain("text/html");
-    expect(mime).toContain("Subject: Jeff mentioned you in Q3 planning");
+    expect(mime).toContain("Subject: Alex mentioned you in Q3 planning");
   });
 
   it("includes the List-Unsubscribe headers when supplied", async () => {

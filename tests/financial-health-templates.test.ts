@@ -250,53 +250,53 @@ describe("financial-health-daily", () => {
 
 describe("a per-person copy", () => {
   // Household discretionary $4,494 split down the middle: $2,247 each.
-  // Month to date, joint $1,400, Jeff's own $760, Kelli's own $180.
+  // Month to date, joint $1,400, Alex's own $760, Sam's own $180.
   // Yesterday, owner-tagged: $472 total, of which $172 is shared. Half of
-  // that is $86 each, so Jeff's share is $184 + $20 + $86 = $290 and
-  // Kelli's is $96 + $86 = $182. The two add back to $472.
+  // that is $86 each, so Alex's share is $184 + $20 + $86 = $290 and
+  // Sam's is $96 + $86 = $182. The two add back to $472.
   const YESTERDAY = [
-    { merchant: "Jenson USA", amount: 184, category: "Shopping", owner: "Jeff" },
-    { merchant: "Free People", amount: 96, category: "Clothing & Apparel", owner: "Kelli" },
+    { merchant: "Jenson USA", amount: 184, category: "Shopping", owner: "Alex" },
+    { merchant: "Free People", amount: 96, category: "Clothing & Apparel", owner: "Sam" },
     { merchant: "Grocery Outlet", amount: 71, category: "Groceries & Meal Kits" },
     { merchant: "Speak Cheezy", amount: 63, category: "Restaurants & Dining Out" },
     { merchant: "Uber", amount: 23, category: "Rideshare, Transit & Tolls", needed: true },
-    { merchant: "Zwift", amount: 20, category: "Gym & Fitness", pending: true, owner: "Jeff" },
+    { merchant: "Zwift", amount: 20, category: "Gym & Fitness", pending: true, owner: "Alex" },
     { merchant: "Amazon", amount: 15, category: "General & Online Retail" },
   ];
   const SHARED = { ...DATA, yesterday: YESTERDAY, household: { budget: 4494, spent: 2340 } };
-  const JEFF = { ...SHARED, budget: 2247, spent: 1460, person: { name: "Jeff", share: 290 } };
-  const KELLI = { ...SHARED, budget: 2247, spent: 880, person: { name: "Kelli", share: 182 } };
+  const ALEX = { ...SHARED, budget: 2247, spent: 1460, person: { name: "Alex", share: 290 } };
+  const SAM = { ...SHARED, budget: 2247, spent: 880, person: { name: "Sam", share: 182 } };
 
   it("gives each person their own hero, pace and subject", async () => {
-    const jeff = await render(JEFF);
-    const kelli = await render(KELLI);
+    const alex = await render(ALEX);
+    const sam = await render(SAM);
     // Same day, same household, opposite verdicts — the point of two emails.
-    expect(jeff.subject).toBe("Tue Sep 15 · $787 left · $411 over pace");
-    expect(kelli.subject).toBe("Tue Sep 15 · $1,367 left · $169 under pace");
-    expect(jeff.html).toContain("Jeff, left to spend");
-    expect(kelli.html).toContain("Kelli, left to spend");
+    expect(alex.subject).toBe("Tue Sep 15 · $787 left · $411 over pace");
+    expect(sam.subject).toBe("Tue Sep 15 · $1,367 left · $169 under pace");
+    expect(alex.html).toContain("Alex, left to spend");
+    expect(sam.html).toContain("Sam, left to spend");
   });
 
   it("shows the shared total underneath, so the two copies reconcile", async () => {
-    const out = await render(JEFF);
+    const out = await render(ALEX);
     expect(out.html).toContain("Together you have spent $2,340 of $4,494");
     expect(out.html).toContain("Half of everything shared comes out of each of you.");
     expect(out.text).toContain("Together you have spent $2,340 of $4,494.");
   });
 
   it("halves add back to the household", () => {
-    expect(JEFF.spent + KELLI.spent).toBe(JEFF.household.spent);
-    expect(JEFF.budget + KELLI.budget).toBe(JEFF.household.budget);
-    expect(JEFF.person.share + KELLI.person.share).toBe(472); // yesterday's $472
+    expect(ALEX.spent + SAM.spent).toBe(ALEX.household.spent);
+    expect(ALEX.budget + SAM.budget).toBe(ALEX.household.budget);
+    expect(ALEX.person.share + SAM.person.share).toBe(472); // yesterday's $472
   });
 
   it("names each charge's owner and says what yesterday cost the reader", async () => {
-    const out = await render(JEFF);
+    const out = await render(ALEX);
     expect(out.html).toContain("7 new · $472 · $290 yours");
     expect(out.html).toContain("Jenson USA");
     // Both people's charges are listed — they see everything.
-    expect(out.text).toContain("Jenson USA $184 Shopping [Jeff]");
-    expect(out.text).toContain("Free People $96 Clothing & Apparel [Kelli]");
+    expect(out.text).toContain("Jenson USA $184 Shopping [Alex]");
+    expect(out.text).toContain("Free People $96 Clothing & Apparel [Sam]");
     expect(out.html).toContain("Unlabelled charges are shared and count half to each of you.");
   });
 

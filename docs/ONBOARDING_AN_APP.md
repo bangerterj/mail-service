@@ -264,7 +264,7 @@ from the server:
 await mail.send({
   to: user.email,
   template: "mention",
-  data: { actorName: "Jeff", contextTitle: "Weekly meal plan", url: threadUrl },
+  data: { actorName: "Alex", contextTitle: "Weekly meal plan", url: threadUrl },
   unsubscribeUrl: `https://familypantree.com/settings/notifications?token=${optOutToken}`,
 });
 ```
