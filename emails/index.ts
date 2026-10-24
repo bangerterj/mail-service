@@ -39,6 +39,38 @@ import {
   BANTER_SIGNIN_TEXT,
   BANTER_SIGNIN_TOKENS,
 } from "./banter/signin";
+import {
+  SADDLEOUT_SIGN_IN_HTML,
+  SADDLEOUT_SIGN_IN_SUBJECT,
+  SADDLEOUT_SIGN_IN_TEXT,
+  SADDLEOUT_SIGN_IN_TOKENS,
+} from "./saddleout/magic-sign-in";
+import {
+  SADDLEOUT_NEW_SIGNUP_HTML,
+  SADDLEOUT_NEW_SIGNUP_SUBJECT,
+  SADDLEOUT_NEW_SIGNUP_TEXT,
+  SADDLEOUT_NEW_SIGNUP_TOKENS,
+} from "./saddleout/new-signup";
+import {
+  SADDLEOUT_BETA_ACCESS_HTML,
+  SADDLEOUT_BETA_ACCESS_SUBJECT,
+  SADDLEOUT_BETA_ACCESS_TEXT,
+  SADDLEOUT_BETA_ACCESS_TOKENS,
+} from "./saddleout/beta-access";
+import {
+  SADDLEOUT_ROUTE_READY_HTML,
+  SADDLEOUT_ROUTE_READY_TEXT,
+  SADDLEOUT_ROUTE_READY_TOKENS,
+  SADDLEOUT_ROUTE_SUBJECT,
+  SADDLEOUT_ROUTE_UPDATE_HTML,
+  SADDLEOUT_ROUTE_UPDATE_TEXT,
+  SADDLEOUT_ROUTE_UPDATE_TOKENS,
+} from "./saddleout/route-update";
+import {
+  SADDLEOUT_MESSAGE_SUBJECT,
+  SaddleoutMessageEmail,
+  saddleoutMessageText,
+} from "./saddleout/message";
 import { BanterRecapEmail, banterRecapText } from "./banter/recap";
 import {
   FinancialHealthDailyEmail,
@@ -363,6 +395,90 @@ export const templates = {
       preferencesUrl: z.string().url(),
       reportUrl: z.string().min(1).max(300),
     }),
+  }),
+  "saddleout-magic-sign-in": defineTokens({
+    category: "transactional",
+    tokens: SADDLEOUT_SIGN_IN_TOKENS,
+    subjectTemplate: SADDLEOUT_SIGN_IN_SUBJECT,
+    html: SADDLEOUT_SIGN_IN_HTML,
+    textTemplate: SADDLEOUT_SIGN_IN_TEXT,
+    schema: z.object({
+      signInUrl: z.string().url(),
+      expiresIn: z.string().min(1).max(50).default("15 minutes"),
+    }),
+  }),
+  // To SaddleOut's own admins when a rider signs up. A rider's action caused it,
+  // so it is a notification and the footer link is the admin's opt-out.
+  "saddleout-new-signup": defineTokens({
+    category: "notification",
+    tokens: SADDLEOUT_NEW_SIGNUP_TOKENS,
+    subjectTemplate: SADDLEOUT_NEW_SIGNUP_SUBJECT,
+    html: SADDLEOUT_NEW_SIGNUP_HTML,
+    textTemplate: SADDLEOUT_NEW_SIGNUP_TEXT,
+    unsubscribeToken: "preferencesUrl",
+    schema: z.object({
+      eyebrow: z.string().min(1).max(40),
+      headline: z.string().min(1).max(120),
+      details: z.string().min(1).max(3000),
+      totals: z.string().min(1).max(200),
+      adminUrl: z.string().url(),
+    }),
+  }),
+  // To a rider let in from the beta queue: they asked for access and for this email.
+  "saddleout-beta-access": defineTokens({
+    category: "transactional",
+    tokens: SADDLEOUT_BETA_ACCESS_TOKENS,
+    subjectTemplate: SADDLEOUT_BETA_ACCESS_SUBJECT,
+    html: SADDLEOUT_BETA_ACCESS_HTML,
+    textTemplate: SADDLEOUT_BETA_ACCESS_TEXT,
+    schema: z.object({
+      name: z.string().min(1).max(60),
+      devices: z.string().min(1).max(120),
+      pageUrl: z.string().url(),
+    }),
+  }),
+  // Create a route: to the rider who uploaded it (their own action), at each build step.
+  "saddleout-route-update": defineTokens({
+    category: "transactional",
+    tokens: SADDLEOUT_ROUTE_UPDATE_TOKENS,
+    subjectTemplate: SADDLEOUT_ROUTE_SUBJECT,
+    html: SADDLEOUT_ROUTE_UPDATE_HTML,
+    textTemplate: SADDLEOUT_ROUTE_UPDATE_TEXT,
+    schema: z.object({
+      eyebrow: z.string().min(1).max(60),
+      headline: z.string().min(1).max(140),
+      body: z.string().min(1).max(800),
+      buttonLabel: z.string().min(1).max(40),
+      buttonUrl: z.string().url(),
+    }),
+  }),
+  "saddleout-route-ready": defineTokens({
+    category: "transactional",
+    tokens: SADDLEOUT_ROUTE_READY_TOKENS,
+    subjectTemplate: SADDLEOUT_ROUTE_SUBJECT,
+    html: SADDLEOUT_ROUTE_READY_HTML,
+    textTemplate: SADDLEOUT_ROUTE_READY_TEXT,
+    schema: z.object({
+      eyebrow: z.string().min(1).max(60),
+      headline: z.string().min(1).max(140),
+      body: z.string().min(1).max(800),
+      buttonLabel: z.string().min(1).max(40),
+      buttonUrl: z.string().url(),
+      imageUrl: z.string().url(),
+    }),
+  }),
+  // A one-to-one reply from /admin/feedback to a rider who wrote in. Body is plain text, escaped.
+  "saddleout-message": define({
+    category: "transactional",
+    schema: z.object({
+      name: z.string().min(1).max(60),
+      body: z.string().min(1).max(5000),
+      ctaUrl: z.string().url().optional(),
+      ctaLabel: z.string().min(1).max(40).optional(),
+    }),
+    subject: () => SADDLEOUT_MESSAGE_SUBJECT,
+    component: (props) => React.createElement(SaddleoutMessageEmail, props),
+    text: saddleoutMessageText,
   }),
   "banter-signin": defineTokens({
     category: "transactional",

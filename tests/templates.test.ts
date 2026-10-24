@@ -18,6 +18,12 @@ describe("template registry", () => {
         // App-specific templates: FamilyPantree's own design, served verbatim.
         "familypantree-password-reset",
         "familypantree-magic-sign-in",
+        "saddleout-magic-sign-in",
+        "saddleout-new-signup",
+        "saddleout-beta-access",
+        "saddleout-route-update",
+        "saddleout-route-ready",
+        "saddleout-message",
         "familypantree-household-invite",
         "familypantree-group-invite",
         "banter-signin",

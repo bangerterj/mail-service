@@ -48,6 +48,11 @@ export interface TemplateData {
     preferencesUrl: string;
     reportUrl: string;
   };
+  "saddleout-magic-sign-in": { signInUrl: string; expiresIn?: string };
+  "saddleout-route-update": { eyebrow: string; headline: string; body: string; buttonLabel: string; buttonUrl: string };
+  "saddleout-route-ready": { eyebrow: string; headline: string; body: string; buttonLabel: string; buttonUrl: string; imageUrl: string };
+  "saddleout-beta-access": { name: string; devices: string; pageUrl: string };
+  "saddleout-new-signup": { eyebrow: string; headline: string; details: string; totals: string; adminUrl: string };
   "familypantree-magic-sign-in": {
     signInUrl: string;
     siteDomain: string;
@@ -217,6 +222,7 @@ export const NOTIFICATION_TEMPLATES = [
   "familypantree-group-invite",
   "banter-recap",
   "financial-health-daily",
+  "saddleout-new-signup",
 ] as const;
 
 export type NotificationTemplate = (typeof NOTIFICATION_TEMPLATES)[number];
